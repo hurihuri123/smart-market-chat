@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage } from "./ChatMessage";
 import { useNavigate } from "react-router-dom";
+import { Progress } from "@/components/ui/progress";
 
 interface Message {
   id: string;
@@ -29,8 +30,17 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [conversationStep, setConversationStep] = useState(0);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
+
+  const placeholders = [
+    "Tell me what you'd like to market...",
+    "Describe your product or service...",
+    "Who is your target audience?...",
+    "What's your marketing goal?...",
+  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -39,6 +49,21 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-focus input on mount
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  // Animate placeholder
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const onboardingQuestions = [
     "Great! Who is your target audience? Tell me about their demographics, interests, and behaviors.",
@@ -108,8 +133,20 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
     }
   };
 
+  const progress = isOnboarding ? ((conversationStep + 1) / (onboardingQuestions.length + 1)) * 100 : 0;
+
   return (
     <div className="flex flex-col h-full">
+      {/* Progress Bar */}
+      {isOnboarding && conversationStep > 0 && (
+        <div className="px-4 pt-3 pb-2">
+          <Progress value={progress} className="h-1.5" />
+          <p className="text-xs text-muted-foreground mt-1 text-center">
+            Step {conversationStep + 1} of {onboardingQuestions.length + 1}
+          </p>
+        </div>
+      )}
+      
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
@@ -136,10 +173,11 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
         ) : (
           <div className="flex gap-2">
             <Textarea
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
+              placeholder={placeholders[placeholderIndex]}
               className="min-h-[60px] resize-none bg-secondary border-border focus:border-primary transition-smooth"
               disabled={isLoading}
             />
