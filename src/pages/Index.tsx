@@ -46,6 +46,48 @@ const Index = () => {
           </p>
         </div>
 
+        {/* Features Section */}
+        <div className="grid md:grid-cols-3 gap-4 animate-in fade-in duration-1000 delay-200">
+          {/* Feature 1 */}
+          <div className="group relative overflow-hidden rounded-xl border border-primary/20 bg-card/40 backdrop-blur-sm p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-glow">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative space-y-3">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">יוצר אסטרטגייה שיווקית</h3>
+            </div>
+          </div>
+
+          {/* Feature 2 */}
+          <div className="group relative overflow-hidden rounded-xl border border-accent/20 bg-card/40 backdrop-blur-sm p-6 transition-all duration-300 hover:border-accent/50 hover:shadow-accent-glow">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative space-y-3">
+              <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">בונה מודעות ממירות</h3>
+            </div>
+          </div>
+
+          {/* Feature 3 */}
+          <div className="group relative overflow-hidden rounded-xl border border-primary-glow/20 bg-card/40 backdrop-blur-sm p-6 transition-all duration-300 hover:border-primary-glow/50 hover:shadow-glow">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-glow/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative space-y-3">
+              <div className="w-12 h-12 rounded-lg bg-primary-glow/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-primary-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">מפעיל ומנהל את הקמפיין</h3>
+            </div>
+          </div>
+        </div>
+
         {/* Chat Card */}
         <Card className="w-full overflow-hidden border border-white/15 bg-background/40 backdrop-blur-2xl shadow-[0_35px_120px_-40px_rgba(56,189,248,0.55)] animate-in slide-in-from-bottom duration-1000">
           <ChatInterface isOnboarding={true} />
