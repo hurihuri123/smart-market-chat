@@ -17,8 +17,8 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
       id: "1",
       role: "assistant",
       content: isOnboarding
-        ? "Tell me what would you like to market today"
-        : "How can I help you optimize your campaigns today?",
+        ? "ספר לי מה תרצה לשווק היום"
+        : "איך אוכל לעזור לך לייעל את הקמפיינים שלך היום?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -28,10 +28,10 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
   const [conversationId, setConversationId] = useState<string | null>(null);
 
   const placeholders = [
-    "Tell me what you'd like to market...",
-    "Describe your product or service...",
-    "Who is your target audience?...",
-    "What's your marketing goal?...",
+    "ספר לי מה תרצה לשווק...",
+    "תאר את המוצר או השירות שלך...",
+    "מי קהל היעד שלך?...",
+    "מה המטרה השיווקית שלך?...",
   ];
 
   useEffect(() => {
@@ -42,10 +42,10 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
   }, []);
 
   const onboardingQuestions = [
-    "Great! Who is your target audience? Tell me about their demographics, interests, and behaviors.",
-    "Perfect! What's your main campaign objective? (e.g., brand awareness, lead generation, sales conversion)",
-    "Excellent! What's your budget range for this campaign?",
-    "Almost there! Now, let's connect your Meta Ads account to get started. Click the button below to authenticate.",
+    "מעולה! מי קהל היעד שלך? ספר לי על הדמוגרפיה, תחומי העניין וההתנהגויות שלהם.",
+    "מושלם! מה מטרת הקמפיין העיקרית שלך? (למשל: מודעות למותג, יצירת לידים, המרות מכירות)",
+    "נהדר! מה טווח התקציב שלך לקמפיין הזה?",
+    "כמעט שם! עכשיו, בוא נחבר את חשבון Meta Ads שלך כדי להתחיל. לחץ על הכפתור למטה כדי להתחבר.",
   ];
 
   const handleSend = async () => {
@@ -87,7 +87,7 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
         role: "assistant",
-        content: "Sorry, something went wrong contacting the server.",
+        content: "מצטער, משהו השתבש בהתקשרות לשרת.",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

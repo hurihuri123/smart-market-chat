@@ -26,23 +26,23 @@ const Index = () => {
         <div className="text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect border border-primary/50 shadow-glow">
             <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-            <span className="text-sm font-semibold">Campaigns that run themselves</span>
+            <span className="text-sm font-semibold">קמפיינים שמנהלים את עצמם</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-accent to-primary-glow bg-clip-text text-transparent animate-in fade-in duration-700">
+          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-accent to-primary-glow bg-clip-text text-transparent animate-in fade-in duration-700 tracking-tight">
             Campainly.AI
           </h1>
           
           <p className="text-2xl md:text-3xl font-semibold text-foreground max-w-2xl mx-auto animate-in fade-in duration-700">
-            Your personal AI campaign manager.
+            מנהל הקמפיינים האישי שלך מבוסס AI
           </p>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-in fade-in duration-1000">
-            Chat for 2 minutes — Campainly.AI will build and launch your Facebook campaigns automatically.
+            שוחח למשך 2 דקות — Campainly.AI יבנה וישיק את קמפיינים הפייסבוק שלך באופן אוטומטי
           </p>
           
           <p className="text-sm text-primary/80 font-medium animate-in fade-in duration-1200">
-            No credit card • No setup required • Just chat and launch
+            ללא כרטיס אשראי • ללא הגדרות • פשוט שוחח והשק
           </p>
         </div>
 
@@ -55,7 +55,7 @@ const Index = () => {
 
         {/* Footer */}
         <div className="text-center space-y-3 animate-in fade-in duration-1200">
-          <p className="text-sm text-muted-foreground">Powered by AI • Facebook & Instagram Ads • Real-time Optimization</p>
+          <p className="text-sm text-muted-foreground">מופעל על ידי AI • פרסום בפייסבוק ואינסטגרם • אופטימיזציה בזמן אמת</p>
           <div className="flex items-center justify-center gap-6 text-muted-foreground/60">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

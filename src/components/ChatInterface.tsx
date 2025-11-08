@@ -40,7 +40,7 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
         <div className="px-4 pt-3 pb-2">
           <Progress value={progress} className="h-1.5" />
           <p className="text-xs text-muted-foreground mt-1 text-center">
-            Step {conversationStep + 1} of {onboardingTotalSteps}
+            שלב {conversationStep + 1} מתוך {onboardingTotalSteps}
           </p>
         </div>
       )}
@@ -53,7 +53,7 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
         {isLoading && (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span className="text-sm">Thinking...</span>
+            <span className="text-sm">חושב...</span>
           </div>
         )}
         <div ref={messagesEndRef} />
