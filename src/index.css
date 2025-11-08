@@ -85,6 +85,11 @@ All colors MUST be HSL.
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
   }
+
+  input,
+  textarea {
+    font-size: 1rem;
+  }
 }
 
 @layer utilities {
