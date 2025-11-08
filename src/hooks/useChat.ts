@@ -12,15 +12,7 @@ interface UseChatOptions {
 }
 
 export function useChat({ isOnboarding = true }: UseChatOptions) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content: isOnboarding
-        ? "אז מה אנחנו משווקים?\n\nאני אאסוף קצת מידע, אחר כך אציע לך אסטרטגיית פרסום ולבסוף גם אריץ את הקמפיינים עבורך 🚀"
-        : "איך אוכל לעזור לך לייעל את הקמפיינים שלך היום?",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [conversationStep, setConversationStep] = useState(0);
