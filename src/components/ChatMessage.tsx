@@ -11,34 +11,11 @@ interface ChatMessageProps {
   message: Message;
 }
 
-const extractVideoUrl = (text: string): string | null => {
+const extractFirstUrl = (text: string): string | null => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const urls = text.match(urlRegex);
-  
   if (!urls || urls.length === 0) return null;
-  
-  const url = urls[0];
-  
-  // YouTube
-  if (url.includes('youtube.com') || url.includes('youtu.be')) {
-    const videoId = url.includes('youtu.be') 
-      ? url.split('youtu.be/')[1]?.split('?')[0]
-      : new URL(url).searchParams.get('v');
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1` : null;
-  }
-  
-  // Vimeo
-  if (url.includes('vimeo.com')) {
-    const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
-    return videoId ? `https://player.vimeo.com/video/${videoId}?autoplay=1&muted=1` : null;
-  }
-  
-  // Generic video file
-  if (url.match(/\.(mp4|webm|ogg)$/i)) {
-    return url;
-  }
-  
-  return null;
+  return urls[0];
 };
 
 const removeUrlFromText = (text: string): string => {
@@ -46,10 +23,12 @@ const removeUrlFromText = (text: string): string => {
   return text.replace(urlRegex, '').trim();
 };
 
+const isDirectVideoFile = (url: string) => /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+
 export const ChatMessage = ({ message }: ChatMessageProps) => {
   const isAssistant = message.role === "assistant";
-  const videoUrl = isAssistant ? extractVideoUrl(message.content) : null;
-  const textContent = videoUrl ? removeUrlFromText(message.content) : message.content;
+  const rawUrl = isAssistant ? extractFirstUrl(message.content) : null;
+  const textContent = rawUrl ? removeUrlFromText(message.content) : message.content;
 
   return (
     <div
@@ -85,15 +64,38 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
           </div>
         )}
         
-        {videoUrl && (
+        {rawUrl && (
           <div className="rounded-2xl overflow-hidden shadow-glow border border-border">
-            <iframe
-              src={videoUrl}
-              className="w-full aspect-video"
-              allow="autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
-            />
+            {isDirectVideoFile(rawUrl) ? (
+              <video
+                src={rawUrl}
+                className="w-full h-auto"
+                autoPlay
+                muted
+                loop
+                controls
+                playsInline
+              />
+            ) : (
+              <iframe
+                src={rawUrl}
+                className="w-full aspect-video"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
+            )}
           </div>
+        )}
+
+        {rawUrl && (
+          <a
+            href={rawUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-sm md:text-base text-primary underline underline-offset-4 break-all"
+          >
+            {rawUrl}
+          </a>
         )}
       </div>
 
