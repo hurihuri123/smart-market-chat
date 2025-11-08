@@ -26,23 +26,23 @@ const Index = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-4xl space-y-8">
+      <div className="relative z-10 w-full max-w-4xl space-y-4 md:space-y-8">
         {/* Hero Section */}
-        <div className="text-center space-y-6">
+        <div className="text-center space-y-3 md:space-y-6">
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-effect border border-primary/30 shadow-glow animate-pulse-glow animate-in fade-in duration-500">
             <Sparkles className="w-4 h-4 text-primary animate-pulse" />
             <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">קמפיינים שמנהלים את עצמם</span>
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-in fade-in duration-700 tracking-normal drop-shadow-2xl leading-tight py-2">
+          <h1 className="text-4xl md:text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-in fade-in duration-700 tracking-normal drop-shadow-2xl leading-tight py-2">
             Campainly.AI
           </h1>
           
-          <p className="text-2xl md:text-4xl font-bold text-foreground max-w-2xl mx-auto animate-in fade-in duration-700 text-glow">
+          <p className="text-xl md:text-4xl font-bold text-foreground max-w-2xl mx-auto animate-in fade-in duration-700 text-glow">
            קמפיינר אישי מבוסס AI
           </p>
           
-          <div className="max-w-3xl mx-auto space-y-4 animate-in fade-in duration-1000">
+          <div className="max-w-3xl mx-auto space-y-2 md:space-y-4 animate-in fade-in duration-1000">
             <p className="text-lg md:text-xl text-muted-foreground/90 leading-relaxed">
               יוצר עבורך אסטרטגיה שיווקית, כותב מודעות ממירות ומריץ קמפיינים
             </p>
@@ -51,7 +51,7 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in duration-1200">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 animate-in fade-in duration-1200">
             <div className="flex items-center gap-2 px-5 py-2.5 rounded-full glass-card border border-primary/20">
               <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
               <span className="text-sm font-medium text-foreground">ללא כרטיס אשראי</span>
@@ -120,7 +120,7 @@ const Index = () => {
         </Card>
 
         {/* Footer */}
-        <div className="text-center space-y-4 animate-in fade-in duration-1200">
+        <div className="hidden text-center space-y-4 animate-in fade-in duration-1200">
           <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass-effect border border-primary/10">
             <span className="text-sm font-medium bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               מופעל על ידי AI • פרסום בפייסבוק ואינסטגרם • אופטימיזציה בזמן אמת
