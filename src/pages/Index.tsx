@@ -34,7 +34,7 @@ const Index = () => {
             <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">קמפיינים שמנהלים את עצמם</span>
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-in fade-in duration-700 tracking-tight drop-shadow-2xl">
+          <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-in fade-in duration-700 tracking-normal drop-shadow-2xl leading-tight py-2">
             Campainly.AI
           </h1>
           
@@ -54,7 +54,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in duration-1200">
             <div className="flex items-center gap-2 px-5 py-2.5 rounded-full glass-card border border-primary/20">
               <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-foreground">ללא צורך בכרטיס אשראי, ללא הגדרות טכניות</span>
+              <span className="text-sm font-medium text-foreground">ללא כרטיס אשראי</span>
             </div>
             <div className="flex items-center gap-2 px-5 py-2.5 rounded-full glass-card border border-secondary/20">
               <div className="w-2 h-2 bg-success rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
