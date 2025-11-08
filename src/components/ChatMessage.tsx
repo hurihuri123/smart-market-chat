@@ -29,6 +29,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
   const isAssistant = message.role === "assistant";
   const rawUrl = isAssistant ? extractFirstUrl(message.content) : null;
   const textContent = rawUrl ? removeUrlFromText(message.content) : message.content;
+  console.log("chat video url", rawUrl);
 
   return (
     <div
@@ -85,17 +86,6 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
               />
             )}
           </div>
-        )}
-
-        {rawUrl && (
-          <a
-            href={rawUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-sm md:text-base text-primary underline underline-offset-4 break-all"
-          >
-            {rawUrl}
-          </a>
         )}
       </div>
 
