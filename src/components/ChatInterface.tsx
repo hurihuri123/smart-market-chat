@@ -12,7 +12,7 @@ interface ChatInterfaceProps {
 }
 
 export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterfaceProps) => {
-  const { messages, input, setInput, isLoading, conversationStep, handleSend, handleKeyDown, currentPlaceholder, progress, isTyping } = useChat({ isOnboarding });
+  const { messages, input, setInput, isLoading, conversationStep, handleSend, handleKeyDown, currentPlaceholder, progress } = useChat({ isOnboarding });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -60,11 +60,11 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
             onKeyDown={handleKeyDown}
             placeholder={currentPlaceholder}
             className="min-h-[60px] resize-none rounded-2xl bg-secondary/60 border-white/10 focus:border-primary transition-smooth focus-visible:ring-0 focus-visible:outline-none"
-            disabled={isLoading || isTyping}
+            disabled={isLoading}
           />
           <Button
             onClick={handleSend}
-            disabled={isLoading || !input.trim() || isTyping}
+            disabled={isLoading || !input.trim()}
             className="gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
             size="icon"
           >
