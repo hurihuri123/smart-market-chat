@@ -14,7 +14,6 @@ interface ChatInterfaceProps {
 export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterfaceProps) => {
   const { messages, input, setInput, isLoading, conversationStep, handleSend, handleKeyDown, currentPlaceholder, progress } = useChat({ isOnboarding });
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,17 +23,10 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
     scrollToBottom();
   }, [messages]);
 
-  // Auto-focus input on mount
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
-
   const onboardingTotalSteps = 5; // UI label only
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col w-full min-h-[220px] max-h-[70vh] overflow-hidden rounded-[28px] border border-white/10 bg-background/70 backdrop-blur-xl shadow-[0_32px_96px_-32px_rgba(56,189,248,0.6)]">
       {/* Progress Bar */}
       {isOnboarding && conversationStep > 0 && (
         <div className="px-4 pt-3 pb-2">
@@ -46,7 +38,7 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
       )}
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-5 space-y-4 min-h-[140px]">
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
@@ -60,21 +52,20 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-border">
-        <div className="flex gap-2">
+      <div className="p-4 sm:p-5 border-t border-white/10 bg-background/60">
+        <div className="flex gap-3">
           <Textarea
-            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={currentPlaceholder}
-            className="min-h-[60px] resize-none bg-secondary border-border focus:border-primary transition-smooth"
+            className="min-h-[60px] resize-none rounded-2xl bg-secondary/60 border-white/10 focus:border-primary transition-smooth focus-visible:ring-0 focus-visible:outline-none"
             disabled={isLoading}
           />
           <Button
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
-            className="gradient-primary shadow-glow transition-smooth hover:scale-105"
+            className="gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
             size="icon"
           >
             <Send className="w-4 h-4" />

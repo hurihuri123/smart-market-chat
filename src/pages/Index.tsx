@@ -47,10 +47,8 @@ const Index = () => {
         </div>
 
         {/* Chat Card */}
-        <Card className="glass-effect border-primary/30 shadow-glow animate-in slide-in-from-bottom duration-1000">
-          <div className="h-[350px] flex flex-col">
-            <ChatInterface isOnboarding={true} />
-          </div>
+        <Card className="w-full overflow-hidden border border-white/15 bg-background/40 backdrop-blur-2xl shadow-[0_35px_120px_-40px_rgba(56,189,248,0.55)] animate-in slide-in-from-bottom duration-1000">
+          <ChatInterface isOnboarding={true} />
         </Card>
 
         {/* Footer */}
