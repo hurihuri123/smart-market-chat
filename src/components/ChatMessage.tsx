@@ -69,7 +69,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
           <div className="rounded-2xl overflow-hidden shadow-glow border border-border">
             {isDirectVideoFile(rawUrl) ? (
               <video
-                src={rawUrl}
+                src={"https://player.vimeo.com/video/1134891779?h=1da09c504f"}
                 className="w-full h-auto"
                 autoPlay
                 muted
@@ -79,7 +79,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
               />
             ) : (
               <iframe
-                src={rawUrl}
+                src={"https://player.vimeo.com/video/1134891779?h=1da09c504f"}
                 className="w-full aspect-video"
                 allow="autoplay; encrypted-media; picture-in-picture"
                 allowFullScreen
