@@ -12,13 +12,15 @@ interface UseChatOptions {
 }
 
 export function useChat({ isOnboarding = true }: UseChatOptions) {
+  const fullInitialMessage = isOnboarding
+    ? "אז מה אנחנו משווקים? אני אאסוף קצת מידע, אחר כך אציע לך אסטרטגיית פרסום ולבסוף גם אריץ את הקמפיינים עבורך"
+    : "איך אוכל לעזור לך לייעל את הקמפיינים שלך היום?";
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       role: "assistant",
-      content: isOnboarding
-        ? "ספר לי מה תרצה לשווק היום"
-        : "איך אוכל לעזור לך לייעל את הקמפיינים שלך היום?",
+      content: "",
     },
   ]);
   const [input, setInput] = useState("");
@@ -26,6 +28,7 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
   const [conversationStep, setConversationStep] = useState(0);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(true);
 
   const placeholders = [
     "ספר לי מה תרצה לשווק...",
@@ -39,6 +42,29 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
       setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
     }, 3000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Typing animation for initial message
+  useEffect(() => {
+    if (messages.length === 1 && messages[0].content === "") {
+      let currentIndex = 0;
+      const typingInterval = setInterval(() => {
+        if (currentIndex <= fullInitialMessage.length) {
+          setMessages([
+            {
+              id: "1",
+              role: "assistant",
+              content: fullInitialMessage.slice(0, currentIndex),
+            },
+          ]);
+          currentIndex++;
+        } else {
+          setIsTyping(false);
+          clearInterval(typingInterval);
+        }
+      }, 30);
+      return () => clearInterval(typingInterval);
+    }
   }, []);
 
   const onboardingQuestions = [
@@ -113,6 +139,7 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
     isLoading,
     conversationStep,
     placeholderIndex,
+    isTyping,
     // derived
     currentPlaceholder: placeholders[placeholderIndex],
     progress,
