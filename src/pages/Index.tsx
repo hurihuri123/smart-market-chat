@@ -42,31 +42,29 @@ const Index = () => {
            קמפיינר אישי מבוסס AI
           </p>
           
-          <p className="text-lg md:text-xl text-muted-foreground/90 max-w-2xl mx-auto animate-in fade-in duration-1000 leading-relaxed">
-          Campaignly תשאל אותך כמה שאלות קצרות, תבין את העסק שלך,
-          ותתחיל להריץ עבורך קמפיינים ממומנים שמביאים תוצאות – לבד.
-          </p>
+          <div className="max-w-3xl mx-auto space-y-4 animate-in fade-in duration-1000">
+            <p className="text-lg md:text-xl text-muted-foreground/90 leading-relaxed">
+              יוצר עבורך אסטרטגיה שיווקית, כותב מודעות ממירות ומריץ קמפיינים
+            </p>
+            <p className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent leading-relaxed">
+              שמביאים לקוחות משלמים – לגמרי לבד
+            </p>
+          </div>
           
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full glass-card border border-primary/20 animate-in fade-in duration-1200">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in duration-1200">
+            <div className="flex items-center gap-2 px-5 py-2.5 rounded-full glass-card border border-primary/20">
               <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-primary">ללא כרטיס אשראי</span>
+              <span className="text-sm font-medium text-foreground">ללא צורך בכרטיס אשראי, ללא הגדרות טכניות</span>
             </div>
-            <div className="w-1 h-4 bg-border" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-5 py-2.5 rounded-full glass-card border border-secondary/20">
               <div className="w-2 h-2 bg-success rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
-              <span className="text-sm font-medium text-secondary">ללא הגדרות</span>
-            </div>
-            <div className="w-1 h-4 bg-border" />
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-success rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
-              <span className="text-sm font-medium text-accent">פשוט שוחח והשק</span>
+              <span className="text-sm font-medium text-foreground">שיחה קצרה והקמפיין רץ</span>
             </div>
           </div>
         </div>
 
-        {/* Features Section */}
-        <div className="grid md:grid-cols-3 gap-5 animate-in fade-in duration-1000 delay-200">
+        {/* Features Section - Hidden on mobile */}
+        <div className="hidden md:grid md:grid-cols-3 gap-5 animate-in fade-in duration-1000 delay-200">
           {/* Feature 1 */}
           <div className="group relative overflow-hidden rounded-2xl border border-primary/30 glass-card p-8 glow-hover">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
