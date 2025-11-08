@@ -34,12 +34,12 @@ const Index = () => {
           </h1>
           
           <p className="text-2xl md:text-3xl font-semibold text-foreground max-w-2xl mx-auto animate-in fade-in duration-700">
-            מנהל הקמפיינים האישי שלך מבוסס AI
+           קמפיינר אישי מבוסס AI
           </p>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-in fade-in duration-1000">
-            שוחח למשך 2 דקות — Campainly.AI יבנה וישיק את קמפיינים הפייסבוק שלך באופן אוטומטי
-          </p>
+          Campaignly תשאל אותך כמה שאלות קצרות, תבין את העסק שלך,
+          ותתחיל להריץ עבורך קמפיינים ממומנים שמביאים תוצאות – לבד.          </p>
           
           <p className="text-sm text-primary/80 font-medium animate-in fade-in duration-1200">
             ללא כרטיס אשראי • ללא הגדרות • פשוט שוחח והשק
