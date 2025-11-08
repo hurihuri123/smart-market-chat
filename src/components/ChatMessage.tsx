@@ -24,11 +24,15 @@ const removeUrlFromText = (text: string): string => {
 };
 
 const isDirectVideoFile = (url: string) => /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+const HARDCODED_VIDEO_URL = "https://player.vimeo.com/video/1134891779?h=1da09c504f";
 
 export const ChatMessage = ({ message }: ChatMessageProps) => {
   const isAssistant = message.role === "assistant";
   const rawUrl = isAssistant ? extractFirstUrl(message.content) : null;
-  const textContent = rawUrl ? removeUrlFromText(message.content) : message.content;
+  const showHardcodedVideo = isAssistant && message.content.includes("סרטון");
+  const videoSource = showHardcodedVideo ? HARDCODED_VIDEO_URL : rawUrl;
+  const textContent =
+    rawUrl && !showHardcodedVideo ? removeUrlFromText(message.content) : showHardcodedVideo ? "" : message.content;
   console.log("chat video url", rawUrl);
 
   return (
@@ -65,11 +69,11 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
           </div>
         )}
         
-        {rawUrl && (
+        {videoSource && (
           <div className="rounded-2xl overflow-hidden shadow-glow border border-border">
-            {isDirectVideoFile(rawUrl) ? (
+            {isDirectVideoFile(videoSource) ? (
               <video
-                src={"https://player.vimeo.com/video/1134891779?h=1da09c504f"}
+                src={videoSource}
                 className="w-full h-auto"
                 autoPlay
                 muted
@@ -79,7 +83,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
               />
             ) : (
               <iframe
-                src={"https://player.vimeo.com/video/1134891779?h=1da09c504f"}
+                src={videoSource}
                 className="w-full aspect-video"
                 allow="autoplay; encrypted-media; picture-in-picture"
                 allowFullScreen
