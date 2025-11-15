@@ -11,11 +11,10 @@ interface UseChatOptions {
   isOnboarding?: boolean;
 }
 
-export function useChat({ isOnboarding = true }: UseChatOptions) {
+export function useChat(_: UseChatOptions = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationStep, setConversationStep] = useState(0);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [conversationId, setConversationId] = useState<string | null>(null);
 
@@ -33,13 +32,6 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
     return () => clearInterval(interval);
   }, []);
 
-  const onboardingQuestions = [
-    "מעולה! מי קהל היעד שלך? ספר לי על הדמוגרפיה, תחומי העניין וההתנהגויות שלהם.",
-    "מושלם! מה מטרת הקמפיין העיקרית שלך? (למשל: מודעות למותג, יצירת לידים, המרות מכירות)",
-    "נהדר! מה טווח התקציב שלך לקמפיין הזה?",
-    "כמעט שם! עכשיו, בוא נחבר את חשבון Meta Ads שלך כדי להתחיל. לחץ על הכפתור למטה כדי להתחבר.",
-  ];
-
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -52,10 +44,6 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-
-    if (isOnboarding) {
-      setConversationStep((prev) => Math.min(prev + 1, onboardingQuestions.length));
-    }
 
     try {
       const data: ChatResponse = await sendChatMessage(userMessage.content, conversationId);
@@ -71,9 +59,8 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
       };
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // Remain in chat on completion
       if (data.is_complete) {
-        // no-op
+        window.alert("הצ'אט הושלם בהצלחה.");
       }
     } catch {
       const errorMessage: Message = {
@@ -94,9 +81,8 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
     }
   };
 
-  const progress = isOnboarding
-    ? ((conversationStep + 1) / (onboardingQuestions.length + 1)) * 100
-    : 0;
+  const progress = 0;
+  const conversationStep = 0;
 
   return {
     // state
