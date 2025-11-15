@@ -26,16 +26,21 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
   }, [messages]);
 
   useEffect(() => {
-    if (isComplete) {
+    if (true) {
       setShowFacebookDialog(true);
+      onComplete?.();
     }
-  }, [isComplete]);
+  }, [isComplete, onComplete]);
 
   const onboardingTotalSteps = 5; // UI label only
 
   return (
     <>
-      <FacebookLoginDialog open={showFacebookDialog} onOpenChange={setShowFacebookDialog} />
+      <FacebookLoginDialog
+        open={showFacebookDialog}
+        onOpenChange={setShowFacebookDialog}
+        onSuccess={() => setShowFacebookDialog(false)}
+      />
       <div className="flex flex-col w-full min-h-[220px] max-h-[70vh] overflow-hidden rounded-[28px] border border-white/10 bg-background/70 backdrop-blur-xl shadow-[0_32px_96px_-32px_rgba(56,189,248,0.6)]">
       {/* Progress Bar */}
       {isOnboarding && conversationStep > 0 && messages.length > 0 && (

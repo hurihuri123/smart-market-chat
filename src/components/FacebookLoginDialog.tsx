@@ -9,9 +9,10 @@ import { API_BASE_URL } from "@/constants/api";
 interface FacebookLoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-export const FacebookLoginDialog = ({ open, onOpenChange }: FacebookLoginDialogProps) => {
+export const FacebookLoginDialog = ({ open, onOpenChange, onSuccess }: FacebookLoginDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -20,7 +21,7 @@ export const FacebookLoginDialog = ({ open, onOpenChange }: FacebookLoginDialogP
     try {
       // Call your backend API for Facebook OAuth
       const response = await fetch(`${API_BASE_URL}/auth/facebook/login`, {
-        method: "POST",
+        method: "GET",
         headers: { "Content-Type": "application/json" },
       });
 
@@ -36,6 +37,7 @@ export const FacebookLoginDialog = ({ open, onOpenChange }: FacebookLoginDialogP
       }
 
       toast.success("התחברת בהצלחה!");
+      onSuccess?.();
       
       // Redirect to main app
       navigate("/app");

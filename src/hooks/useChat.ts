@@ -17,6 +17,7 @@ export function useChat(_: UseChatOptions = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isComplete, setIsComplete] = useState(false);
 
   const placeholders = [
     "ספר לי מה תרצה לשווק...",
@@ -34,6 +35,7 @@ export function useChat(_: UseChatOptions = {}) {
 
   const handleSend = async () => {
     if (!input.trim()) return;
+    setIsComplete(false);
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -52,17 +54,16 @@ export function useChat(_: UseChatOptions = {}) {
         setConversationId(data.conversation_id);
       }
 
+      if (data.is_complete) {
+        setIsComplete(true);
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: data.message ?? "…",
       };
       setMessages((prev) => [...prev, assistantMessage]);
-
-      // Set completion flag
-      if (data.is_complete) {
-        setIsComplete(true);
-      }
     } catch {
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
@@ -84,21 +85,6 @@ export function useChat(_: UseChatOptions = {}) {
 
   const progress = 0;
   const conversationStep = 0;
-
-  const [isComplete, setIsComplete] = useState(false);
-
-  useEffect(() => {
-    const checkComplete = async () => {
-      if (messages.length > 0) {
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage.role === "assistant") {
-          // Check if the last response had is_complete flag
-          // This would be stored when we receive the response
-        }
-      }
-    };
-    checkComplete();
-  }, [messages]);
 
   return {
     // state
