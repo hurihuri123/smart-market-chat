@@ -1,10 +1,11 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage } from "./ChatMessage";
 import { Progress } from "@/components/ui/progress";
 import { useChat } from "@/hooks/useChat";
+import { FacebookLoginDialog } from "./FacebookLoginDialog";
 
 interface ChatInterfaceProps {
   isOnboarding?: boolean;
@@ -12,8 +13,9 @@ interface ChatInterfaceProps {
 }
 
 export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterfaceProps) => {
-  const { messages, input, setInput, isLoading, conversationStep, handleSend, handleKeyDown, currentPlaceholder, progress } = useChat({ isOnboarding });
+  const { messages, input, setInput, isLoading, conversationStep, handleSend, handleKeyDown, currentPlaceholder, progress, isComplete } = useChat({ isOnboarding });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showFacebookDialog, setShowFacebookDialog] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -23,10 +25,18 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (isComplete) {
+      setShowFacebookDialog(true);
+    }
+  }, [isComplete]);
+
   const onboardingTotalSteps = 5; // UI label only
 
   return (
-    <div className="flex flex-col w-full min-h-[220px] max-h-[70vh] overflow-hidden rounded-[28px] border border-white/10 bg-background/70 backdrop-blur-xl shadow-[0_32px_96px_-32px_rgba(56,189,248,0.6)]">
+    <>
+      <FacebookLoginDialog open={showFacebookDialog} onOpenChange={setShowFacebookDialog} />
+      <div className="flex flex-col w-full min-h-[220px] max-h-[70vh] overflow-hidden rounded-[28px] border border-white/10 bg-background/70 backdrop-blur-xl shadow-[0_32px_96px_-32px_rgba(56,189,248,0.6)]">
       {/* Progress Bar */}
       {isOnboarding && conversationStep > 0 && messages.length > 0 && (
         <div className="px-4 pt-3 pb-2">
@@ -108,6 +118,7 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
           </div>
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 };
