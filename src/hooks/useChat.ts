@@ -71,9 +71,9 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
       };
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // Remain in chat on completion
+      // Set completion flag
       if (data.is_complete) {
-        // no-op
+        setIsComplete(true);
       }
     } catch {
       const errorMessage: Message = {
@@ -98,6 +98,21 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
     ? ((conversationStep + 1) / (onboardingQuestions.length + 1)) * 100
     : 0;
 
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    const checkComplete = async () => {
+      if (messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage.role === "assistant") {
+          // Check if the last response had is_complete flag
+          // This would be stored when we receive the response
+        }
+      }
+    };
+    checkComplete();
+  }, [messages]);
+
   return {
     // state
     messages,
@@ -105,11 +120,13 @@ export function useChat({ isOnboarding = true }: UseChatOptions) {
     isLoading,
     conversationStep,
     placeholderIndex,
+    isComplete,
     // derived
     currentPlaceholder: placeholders[placeholderIndex],
     progress,
     // setters
     setInput,
+    setIsComplete,
     // actions
     handleSend,
     handleKeyDown,
