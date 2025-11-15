@@ -5,6 +5,7 @@ export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  showFacebookLogin?: boolean;
 }
 
 interface UseChatOptions {
@@ -56,6 +57,14 @@ export function useChat(_: UseChatOptions = {}) {
 
       if (data.is_complete) {
         setIsComplete(true);
+        // Add Facebook login message
+        const fbMessage: Message = {
+          id: Date.now().toString() + "-fb",
+          role: "assistant",
+          content: "מעולה! סיימנו את השלבים הראשונים. כעת, בוא נתחבר לפייסבוק כדי שאוכל להריץ את הקמפיינים עבורך 🚀",
+          showFacebookLogin: true,
+        };
+        setMessages((prev) => [...prev, fbMessage]);
       }
 
       const assistantMessage: Message = {

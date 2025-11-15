@@ -1,10 +1,16 @@
 import { cn } from "@/lib/utils";
 import { Bot, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "@/constants/api";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  showFacebookLogin?: boolean;
 }
 
 interface ChatMessageProps {
@@ -13,6 +19,78 @@ interface ChatMessageProps {
 
 export const ChatMessage = ({ message }: ChatMessageProps) => {
   const isAssistant = message.role === "assistant";
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFacebookLogin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/facebook/login`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get Facebook login URL");
+      }
+
+      const data = await response.json();
+      
+      if (!data.url) {
+        throw new Error("No login URL received");
+      }
+
+      const width = 600;
+      const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      
+      const popup = window.open(
+        data.url,
+        "Facebook Login",
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes`
+      );
+
+      if (!popup) {
+        toast.error("חלון הפופאפ נחסם. אנא אפשר פופאפים.");
+        setIsLoading(false);
+        return;
+      }
+
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === "facebook_auth_success") {
+          if (event.data.access_token) {
+            localStorage.setItem("auth_token", event.data.access_token);
+          }
+          
+          toast.success("התחברת בהצלחה!");
+          navigate("/app");
+          window.removeEventListener("message", handleMessage);
+        } else if (event.data.type === "facebook_auth_error") {
+          toast.error("התחברות נכשלה. נסה שוב.");
+          setIsLoading(false);
+          window.removeEventListener("message", handleMessage);
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      const checkPopupClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopupClosed);
+          window.removeEventListener("message", handleMessage);
+          setIsLoading(false);
+        }
+      }, 500);
+
+    } catch (error) {
+      console.error("Facebook login error:", error);
+      toast.error("התחברות נכשלה. נסה שוב.");
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div
@@ -38,6 +116,15 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
         <p className="text-sm md:text-base whitespace-pre-wrap leading-relaxed">
           {message.content}
         </p>
+        {message.showFacebookLogin && (
+          <Button
+            onClick={handleFacebookLogin}
+            disabled={isLoading}
+            className="mt-4 w-full gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
+          >
+            {isLoading ? "מתחבר..." : "התחבר עם פייסבוק"}
+          </Button>
+        )}
       </div>
 
       {!isAssistant && (
