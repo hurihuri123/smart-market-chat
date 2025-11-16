@@ -2,10 +2,14 @@ import { Card } from "@/components/ui/card";
 import { ChatInterface } from "@/components/ChatInterface";
 import { Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-marketing.jpg";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div className="flex-1 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         {/* Main gradient mesh */}
@@ -142,6 +146,8 @@ const Index = () => {
           </div>
         </div>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 };
