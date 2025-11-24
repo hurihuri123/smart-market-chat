@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import { sendChatMessage, ChatResponse } from "@/services/chatService";
 
+interface AdData {
+  media?: string;
+  mediaType?: "image" | "video";
+  headline: string;
+  primaryText: string;
+  buttonText: string;
+}
+
 export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   showFacebookLogin?: boolean;
+  adPreview?: AdData;
 }
 
 interface UseChatOptions {
@@ -92,6 +101,10 @@ export function useChat(_: UseChatOptions = {}) {
     }
   };
 
+  const addMessage = (message: Message) => {
+    setMessages((prev) => [...prev, message]);
+  };
+
   const progress = 0;
   const conversationStep = 0;
 
@@ -112,5 +125,6 @@ export function useChat(_: UseChatOptions = {}) {
     // actions
     handleSend,
     handleKeyDown,
+    addMessage,
   };
 }
