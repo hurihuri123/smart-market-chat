@@ -6,6 +6,7 @@ import { useChat } from "@/hooks/useChat";
 import { ChatMessage } from "@/components/ChatMessage";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2 } from "lucide-react";
+import { FileUploadDialog } from "@/components/FileUploadDialog";
 
 type Tab = "chat" | "analytics";
 
@@ -35,10 +36,22 @@ const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }
 
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
+  const [fileUploadOpen, setFileUploadOpen] = useState(false);
   const { messages, input, setInput, isLoading, handleSend, handleKeyDown } = useChat({ isOnboarding: false });
 
   const handleQuickAction = (action: string) => {
-    setInput(action);
+    if (action === "אני רוצה להתחיל קמפיין חדש") {
+      setFileUploadOpen(true);
+    } else {
+      setInput(action);
+    }
+  };
+
+  const handleFilesSelected = (files: File[]) => {
+    // For now, just set a message that files were uploaded
+    // In a real implementation, you would handle the file upload to your backend
+    const fileNames = files.map(f => f.name).join(", ");
+    setInput(`אני רוצה להתחיל קמפיין חדש עם הקבצים הבאים: ${fileNames}`);
   };
 
   const tabs = [
@@ -163,6 +176,13 @@ const MainApp = () => {
           </div>
         )}
       </div>
+
+      {/* File Upload Dialog */}
+      <FileUploadDialog
+        open={fileUploadOpen}
+        onOpenChange={setFileUploadOpen}
+        onFilesSelected={handleFilesSelected}
+      />
     </div>
   );
 };
