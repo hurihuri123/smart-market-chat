@@ -14,7 +14,7 @@ const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }
   const actions = [
     { label: "📊 בדוק ביצועים", value: "בדוק את ביצועי הקמפיין שלי" },
     { label: "✨ שפר קמפיין", value: "אני רוצה לשפר את הקמפיין הנוכחי" },
-    { label: "🎯 קמפיין חדש", value: "אני רוצה להתחיל קמפיין חדש" },
+    { label: "🎯 צור מודעה", value: "CREATE_AD_PREVIEW" },
     { label: "💡 עצות", value: "תן לי עצות לשיפור" },
   ];
 
@@ -37,11 +37,24 @@ const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
   const [fileUploadOpen, setFileUploadOpen] = useState(false);
-  const { messages, input, setInput, isLoading, handleSend, handleKeyDown } = useChat({ isOnboarding: false });
+  const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage } = useChat({ isOnboarding: false });
 
   const handleQuickAction = (action: string) => {
     if (action === "אני רוצה להתחיל קמפיין חדש") {
       setFileUploadOpen(true);
+    } else if (action === "CREATE_AD_PREVIEW") {
+      // Create a sample ad preview message
+      const adMessage = {
+        id: Date.now().toString(),
+        role: "assistant" as const,
+        content: "הנה דוגמה למודעה שלך! אתה יכול לגרור תמונה או סרטון לשנות את המדיה, ולערוך את הטקסטים:",
+        adPreview: {
+          headline: "כותרת מושכת שתגרום ללקוחות שלך ללחוץ",
+          primaryText: "זה הטקסט הראשי של המודעה שלך. כאן תספר על המוצר או השירות בצורה מעניינת ומושכת!",
+          buttonText: "לחץ כאן",
+        },
+      };
+      addMessage(adMessage);
     } else {
       setInput(action);
     }

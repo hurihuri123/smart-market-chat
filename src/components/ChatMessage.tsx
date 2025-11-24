@@ -5,12 +5,22 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "@/constants/api";
+import { AdPreview } from "@/components/AdPreview";
+
+interface AdData {
+  media?: string;
+  mediaType?: "image" | "video";
+  headline: string;
+  primaryText: string;
+  buttonText: string;
+}
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   showFacebookLogin?: boolean;
+  adPreview?: AdData;
 }
 
 interface ChatMessageProps {
@@ -116,6 +126,11 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
         <p className="text-sm md:text-base whitespace-pre-wrap leading-relaxed">
           {message.content}
         </p>
+        {message.adPreview && (
+          <div className="mt-4">
+            <AdPreview adData={message.adPreview} editable={true} />
+          </div>
+        )}
         {message.showFacebookLogin && (
           <Button
             onClick={handleFacebookLogin}
