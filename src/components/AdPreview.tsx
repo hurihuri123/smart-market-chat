@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { Upload, X, Play } from "lucide-react";
+import { Upload, X, Play, MoreHorizontal, ThumbsUp, MessageCircle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -100,30 +100,37 @@ export const AdPreview = ({ adData, onUpdate, editable = false }: AdPreviewProps
   };
 
   return (
-    <div className="w-full max-w-md glass-effect border border-border rounded-2xl overflow-hidden shadow-glow">
+    <div className="w-full max-w-md bg-card rounded-lg overflow-hidden border border-border shadow-lg">
       {/* Facebook-style Ad Container */}
-      <div className="p-4 space-y-3">
+      <div className="space-y-0">
         {/* Profile Header (Facebook style) */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full gradient-primary" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold">הדף שלך</p>
-            <p className="text-xs text-muted-foreground">ממומן</p>
+        <div className="flex items-center gap-3 p-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold">הדף שלך</p>
+              <span className="text-xs text-muted-foreground">· ממומן</span>
+            </div>
           </div>
+          <button className="w-9 h-9 rounded-full hover:bg-muted/50 flex items-center justify-center transition-smooth">
+            <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
+          </button>
         </div>
 
         {/* Primary Text */}
-        {editable ? (
-          <textarea
-            value={localData.primaryText}
-            onChange={(e) => handleTextChange("primaryText", e.target.value)}
-            className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary transition-smooth"
-            rows={3}
-            placeholder="הטקסט הראשי של המודעה..."
-          />
-        ) : (
-          <p className="text-sm leading-relaxed">{localData.primaryText}</p>
-        )}
+        <div className="px-3 pb-3">
+          {editable ? (
+            <textarea
+              value={localData.primaryText}
+              onChange={(e) => handleTextChange("primaryText", e.target.value)}
+              className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary transition-smooth"
+              rows={3}
+              placeholder="הטקסט הראשי של המודעה..."
+            />
+          ) : (
+            <p className="text-[15px] leading-snug">{localData.primaryText}</p>
+          )}
+        </div>
 
         {/* Media Section */}
         <div
@@ -182,8 +189,8 @@ export const AdPreview = ({ adData, onUpdate, editable = false }: AdPreviewProps
           )}
         </div>
 
-        {/* Ad Details Card */}
-        <div className="bg-secondary/30 rounded-lg p-3 space-y-2">
+        {/* Ad Details Card - Facebook style link preview */}
+        <div className="bg-muted/30 border-t border-border p-3 space-y-2.5">
           {editable ? (
             <>
               <input
@@ -192,6 +199,7 @@ export const AdPreview = ({ adData, onUpdate, editable = false }: AdPreviewProps
                 className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:border-primary transition-smooth"
                 placeholder="כותרת המודעה..."
               />
+              <p className="text-xs text-muted-foreground">yourwebsite.com</p>
               <input
                 value={localData.buttonText}
                 onChange={(e) => handleTextChange("buttonText", e.target.value)}
@@ -201,12 +209,38 @@ export const AdPreview = ({ adData, onUpdate, editable = false }: AdPreviewProps
             </>
           ) : (
             <>
-              <p className="text-sm font-semibold line-clamp-2">{localData.headline}</p>
-              <Button className="w-full gradient-primary shadow-glow transition-smooth hover:shadow-[0_8px_24px_rgba(56,189,248,0.4)]">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">yourwebsite.com</p>
+              <p className="text-[15px] font-semibold line-clamp-2 leading-tight">{localData.headline}</p>
+              <button className="w-full bg-muted/70 hover:bg-muted text-foreground font-semibold py-2 px-4 rounded-md text-sm transition-smooth">
                 {localData.buttonText}
-              </Button>
+              </button>
             </>
           )}
+        </div>
+
+        {/* Facebook Engagement Bar */}
+        <div className="border-t border-border px-3 py-2">
+          <div className="flex items-center justify-between text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <ThumbsUp className="w-3.5 h-3.5" />
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span className="text-xs">0</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <button className="flex items-center gap-2 hover:text-foreground transition-smooth py-1.5">
+                <ThumbsUp className="w-[18px] h-[18px]" />
+                <span className="text-sm font-medium">אהבתי</span>
+              </button>
+              <button className="flex items-center gap-2 hover:text-foreground transition-smooth py-1.5">
+                <MessageCircle className="w-[18px] h-[18px]" />
+                <span className="text-sm font-medium">תגובה</span>
+              </button>
+              <button className="flex items-center gap-2 hover:text-foreground transition-smooth py-1.5">
+                <Share2 className="w-[18px] h-[18px]" />
+                <span className="text-sm font-medium">שיתוף</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
