@@ -7,9 +7,13 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "@/constants/api";
 import { AdPreview } from "@/components/AdPreview";
 
+interface MediaItem {
+  url: string;
+  type: "image" | "video";
+}
+
 interface AdData {
-  media?: string;
-  mediaType?: "image" | "video";
+  media?: MediaItem[];
   headline: string;
   primaryText: string;
   buttonText: string;

@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { sendChatMessage, ChatResponse } from "@/services/chatService";
 
+interface MediaItem {
+  url: string;
+  type: "image" | "video";
+}
+
 interface AdData {
-  media?: string;
-  mediaType?: "image" | "video";
+  media?: MediaItem[];
   headline: string;
   primaryText: string;
   buttonText: string;
