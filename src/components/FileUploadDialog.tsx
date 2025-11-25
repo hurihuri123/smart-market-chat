@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Upload, X, FileVideo, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadDialogProps {
   open: boolean;
@@ -13,6 +14,8 @@ interface FileUploadDialogProps {
 export const FileUploadDialog = ({ open, onOpenChange, onFilesSelected }: FileUploadDialogProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const { toast } = useToast();
+  const MAX_FILES = 10;
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -34,16 +37,40 @@ export const FileUploadDialog = ({ open, onOpenChange, onFilesSelected }: FileUp
     );
 
     if (files.length > 0) {
-      setSelectedFiles((prev) => [...prev, ...files]);
+      setSelectedFiles((prev) => {
+        const newTotal = prev.length + files.length;
+        if (newTotal > MAX_FILES) {
+          const allowedCount = MAX_FILES - prev.length;
+          toast({
+            title: "מגבלת קבצים",
+            description: `ניתן להעלות עד ${MAX_FILES} קבצים בלבד. נוספו ${allowedCount} קבצים.`,
+            variant: "destructive",
+          });
+          return [...prev, ...files.slice(0, allowedCount)];
+        }
+        return [...prev, ...files];
+      });
     }
-  }, []);
+  }, [toast]);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files).filter(
         (file) => file.type.startsWith("image/") || file.type.startsWith("video/")
       );
-      setSelectedFiles((prev) => [...prev, ...files]);
+      setSelectedFiles((prev) => {
+        const newTotal = prev.length + files.length;
+        if (newTotal > MAX_FILES) {
+          const allowedCount = MAX_FILES - prev.length;
+          toast({
+            title: "מגבלת קבצים",
+            description: `ניתן להעלות עד ${MAX_FILES} קבצים בלבד. נוספו ${allowedCount} קבצים.`,
+            variant: "destructive",
+          });
+          return [...prev, ...files.slice(0, allowedCount)];
+        }
+        return [...prev, ...files];
+      });
     }
   };
 
@@ -107,7 +134,7 @@ export const FileUploadDialog = ({ open, onOpenChange, onFilesSelected }: FileUp
                     או לחץ לבחירת קבצים
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    תמונות או סרטונים בלבד
+                    תמונות או סרטונים בלבד (עד 10 קבצים)
                   </p>
                 </div>
               </div>
