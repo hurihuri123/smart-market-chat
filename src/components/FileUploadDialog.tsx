@@ -71,6 +71,8 @@ export const FileUploadDialog = ({ open, onOpenChange, onFilesSelected }: FileUp
         }
         return [...prev, ...files];
       });
+      // Reset input to allow selecting the same files again
+      e.target.value = '';
     }
   };
 
@@ -131,10 +133,10 @@ export const FileUploadDialog = ({ open, onOpenChange, onFilesSelected }: FileUp
                     גרור ושחרר קבצים כאן
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    או לחץ לבחירת קבצים
+                    או לחץ לבחירת קבצים (אפשר לבחור מספר פעמים)
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    תמונות או סרטונים בלבד (עד 10 קבצים)
+                    תמונות או סרטונים בלבד • עד 10 קבצים • השתמש ב-Ctrl/Cmd לבחירה מרובה
                   </p>
                 </div>
               </div>
