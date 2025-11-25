@@ -132,7 +132,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
         </p>
         {message.adPreview && (
           <div className="mt-4">
-            <AdPreview adData={message.adPreview} editable={true} />
+            <AdPreview adData={message.adPreview} editable={true} showSubmitButton={true} />
           </div>
         )}
         {message.showFacebookLogin && (
