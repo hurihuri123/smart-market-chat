@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
-import { Upload, X, Play, MoreHorizontal, ThumbsUp, MessageCircle, Share2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Upload, X, Play, MoreHorizontal, ThumbsUp, MessageCircle, Share2, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FileUploadDialog } from "./FileUploadDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface MediaItem {
   url: string;
@@ -20,12 +22,14 @@ interface AdPreviewProps {
   adData: AdData;
   onUpdate?: (data: AdData) => void;
   editable?: boolean;
+  showSubmitButton?: boolean;
 }
 
-export const AdPreview = ({ adData, onUpdate, editable = false }: AdPreviewProps) => {
+export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton = false }: AdPreviewProps) => {
   const [localData, setLocalData] = useState<AdData>(adData);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFilesSelected = useCallback(
     (files: File[]) => {
@@ -80,6 +84,27 @@ export const AdPreview = ({ adData, onUpdate, editable = false }: AdPreviewProps
     const newData = { ...localData, [field]: value };
     setLocalData(newData);
     onUpdate?.(newData);
+  };
+
+  const handleSubmitAd = async () => {
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('submit-ad', {
+        body: localData,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Ad submitted successfully:', data);
+      toast.success('המודעה נשלחה בהצלחה! 🎉');
+    } catch (error) {
+      console.error('Error submitting ad:', error);
+      toast.error('אירעה שגיאה בשליחת המודעה. נסה שוב.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -279,6 +304,29 @@ export const AdPreview = ({ adData, onUpdate, editable = false }: AdPreviewProps
           </div>
         </div>
       </div>
+
+      {/* Submit Button */}
+      {showSubmitButton && (
+        <div className="mt-4">
+          <Button
+            onClick={handleSubmitAd}
+            disabled={isSubmitting || !localData.headline || !localData.primaryText || !localData.buttonText}
+            className="w-full gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
+            size="lg"
+          >
+            {isSubmitting ? (
+              <>
+                <span className="mr-2">שולח...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-5 h-5 ml-2" />
+                המודעה מוכנה - שלח לבאקאנד
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
