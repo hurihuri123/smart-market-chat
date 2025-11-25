@@ -1,11 +1,16 @@
-import { useState, useCallback, useRef } from "react";
-import { Upload, X, Play, MoreHorizontal, ThumbsUp, MessageCircle, Share2 } from "lucide-react";
+import { useState, useCallback } from "react";
+import { Upload, X, Play, MoreHorizontal, ThumbsUp, MessageCircle, Share2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { FileUploadDialog } from "./FileUploadDialog";
+
+interface MediaItem {
+  url: string;
+  type: "image" | "video";
+}
 
 interface AdData {
-  media?: string;
-  mediaType?: "image" | "video";
+  media?: MediaItem[];
   headline: string;
   primaryText: string;
   buttonText: string;
@@ -19,78 +24,56 @@ interface AdPreviewProps {
 
 export const AdPreview = ({ adData, onUpdate, editable = false }: AdPreviewProps) => {
   const [localData, setLocalData] = useState<AdData>(adData);
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
+  const handleFilesSelected = useCallback(
+    (files: File[]) => {
+      const mediaItems: MediaItem[] = [];
+      let processedCount = 0;
 
-      const file = e.dataTransfer.files[0];
-      if (!file) return;
-
-      if (file.type.startsWith("image/")) {
+      files.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (event) => {
-          const newData = { ...localData, media: event.target?.result as string, mediaType: "image" as const };
-          setLocalData(newData);
-          onUpdate?.(newData);
+          const url = event.target?.result as string;
+          const type = file.type.startsWith("image/") ? "image" : "video";
+          mediaItems.push({ url, type });
+          
+          processedCount++;
+          if (processedCount === files.length) {
+            const newData = { 
+              ...localData, 
+              media: [...(localData.media || []), ...mediaItems] 
+            };
+            setLocalData(newData);
+            onUpdate?.(newData);
+          }
         };
         reader.readAsDataURL(file);
-      } else if (file.type.startsWith("video/")) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const newData = { ...localData, media: event.target?.result as string, mediaType: "video" as const };
-          setLocalData(newData);
-          onUpdate?.(newData);
-        };
-        reader.readAsDataURL(file);
-      }
+      });
     },
     [localData, onUpdate]
   );
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleFileSelect = (file: File) => {
-    if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newData = { ...localData, media: event.target?.result as string, mediaType: "image" as const };
-        setLocalData(newData);
-        onUpdate?.(newData);
-      };
-      reader.readAsDataURL(file);
-    } else if (file.type.startsWith("video/")) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newData = { ...localData, media: event.target?.result as string, mediaType: "video" as const };
-        setLocalData(newData);
-        onUpdate?.(newData);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
-    }
-  };
-
-  const handleRemoveMedia = () => {
-    const newData = { ...localData, media: undefined, mediaType: undefined };
+  const handleRemoveMedia = (index: number) => {
+    const newMedia = localData.media?.filter((_, i) => i !== index);
+    const newData = { ...localData, media: newMedia };
     setLocalData(newData);
     onUpdate?.(newData);
+    
+    if (currentMediaIndex >= (newMedia?.length || 0) && currentMediaIndex > 0) {
+      setCurrentMediaIndex(currentMediaIndex - 1);
+    }
+  };
+
+  const handlePrevMedia = () => {
+    setCurrentMediaIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNextMedia = () => {
+    setCurrentMediaIndex((prev) => 
+      Math.min((localData.media?.length || 1) - 1, prev + 1)
+    );
   };
 
   const handleTextChange = (field: keyof AdData, value: string) => {
@@ -133,61 +116,114 @@ export const AdPreview = ({ adData, onUpdate, editable = false }: AdPreviewProps
         </div>
 
         {/* Media Section */}
-        <div
-          className={cn(
-            "relative w-full aspect-[4/3] rounded-lg overflow-hidden transition-smooth cursor-pointer",
-            isDragging && "ring-2 ring-primary ring-offset-2",
-            !localData.media && editable && "border-2 border-dashed border-border bg-secondary/20"
-          )}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={() => editable && !localData.media && fileInputRef.current?.click()}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,video/*"
-            onChange={handleFileInputChange}
-            className="hidden"
-          />
-          {localData.media ? (
+        <div className="relative w-full aspect-[4/3] bg-secondary/20 overflow-hidden">
+          {localData.media && localData.media.length > 0 ? (
             <>
-              {localData.mediaType === "image" ? (
-                <img src={localData.media} alt="Ad media" className="w-full h-full object-cover" />
-              ) : (
-                <div className="relative w-full h-full bg-black/90">
-                  <video src={localData.media} className="w-full h-full object-contain" controls={false} />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
-                      <Play className="w-8 h-8 text-black mr-1" />
+              {/* Current Media Display */}
+              <div className="w-full h-full">
+                {localData.media[currentMediaIndex].type === "image" ? (
+                  <img 
+                    src={localData.media[currentMediaIndex].url} 
+                    alt="Ad media" 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <div className="relative w-full h-full bg-black/90">
+                    <video 
+                      src={localData.media[currentMediaIndex].url} 
+                      className="w-full h-full object-contain" 
+                      controls={false} 
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
+                        <Play className="w-8 h-8 text-black mr-1" />
+                      </div>
                     </div>
                   </div>
+                )}
+              </div>
+
+              {/* Navigation Arrows */}
+              {localData.media.length > 1 && (
+                <>
+                  <button
+                    onClick={handlePrevMedia}
+                    disabled={currentMediaIndex === 0}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-smooth disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight className="w-5 h-5 text-white" />
+                  </button>
+                  <button
+                    onClick={handleNextMedia}
+                    disabled={currentMediaIndex === localData.media.length - 1}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-smooth disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-white" />
+                  </button>
+                </>
+              )}
+
+              {/* Media Counter */}
+              {localData.media.length > 1 && (
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm">
+                  <p className="text-xs text-white font-medium">
+                    {currentMediaIndex + 1} / {localData.media.length}
+                  </p>
                 </div>
               )}
+
+              {/* Remove Current Media Button */}
               {editable && (
                 <button
-                  onClick={handleRemoveMedia}
-                  className="absolute top-2 left-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-smooth"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveMedia(currentMediaIndex);
+                  }}
+                  className="absolute top-3 left-3 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-smooth z-10"
                 >
                   <X className="w-4 h-4 text-white" />
                 </button>
               )}
+
+              {/* Add More Button */}
+              {editable && localData.media.length < 10 && (
+                <button
+                  onClick={() => setShowUploadDialog(true)}
+                  className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-primary/90 backdrop-blur-sm flex items-center gap-2 hover:bg-primary transition-smooth shadow-glow"
+                >
+                  <Upload className="w-4 h-4 text-white" />
+                  <span className="text-sm text-white font-medium">
+                    הוסף עוד ({localData.media.length}/10)
+                  </span>
+                </button>
+              )}
             </>
           ) : editable ? (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-3 p-6 text-center">
+            <button
+              onClick={() => setShowUploadDialog(true)}
+              className="w-full h-full flex flex-col items-center justify-center gap-3 p-6 text-center hover:bg-secondary/30 transition-smooth"
+            >
               <Upload className="w-10 h-10 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium text-foreground">גרור תמונה או סרטון לכאן</p>
-                <p className="text-xs text-muted-foreground mt-1">או לחץ לבחירה</p>
+                <p className="text-sm font-medium text-foreground">העלה תמונות או סרטונים</p>
+                <p className="text-xs text-muted-foreground mt-1">עד 10 קבצים</p>
               </div>
-            </div>
+            </button>
           ) : (
             <div className="w-full h-full bg-secondary/40 flex items-center justify-center">
               <p className="text-muted-foreground text-sm">ללא מדיה</p>
             </div>
           )}
         </div>
+
+        {/* File Upload Dialog */}
+        {editable && (
+          <FileUploadDialog
+            open={showUploadDialog}
+            onOpenChange={setShowUploadDialog}
+            onFilesSelected={handleFilesSelected}
+          />
+        )}
 
         {/* Ad Details Card - Facebook style link preview */}
         <div className="bg-muted/30 border-t border-border p-3 space-y-2.5">
