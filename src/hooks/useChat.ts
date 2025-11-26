@@ -47,6 +47,35 @@ export function useChat(_: UseChatOptions = {}) {
     return () => clearInterval(interval);
   }, []);
 
+  // Load last conversation from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("campainly_last_conversation");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.conversationId) setConversationId(parsed.conversationId);
+        if (Array.isArray(parsed?.messages)) setMessages(parsed.messages);
+        if (parsed?.isComplete) setIsComplete(Boolean(parsed.isComplete));
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
+  // Persist conversation to localStorage when it changes
+  useEffect(() => {
+    try {
+      const payload = { conversationId, messages, isComplete };
+      if (conversationId || messages.length) {
+        localStorage.setItem("campainly_last_conversation", JSON.stringify(payload));
+      } else {
+        localStorage.removeItem("campainly_last_conversation");
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [conversationId, messages, isComplete]);
+
   const handleSend = async () => {
     if (!input.trim()) return;
     setIsComplete(false);
@@ -120,12 +149,14 @@ export function useChat(_: UseChatOptions = {}) {
     conversationStep,
     placeholderIndex,
     isComplete,
+    conversationId,
     // derived
     currentPlaceholder: placeholders[placeholderIndex],
     progress,
     // setters
     setInput,
     setIsComplete,
+    setConversationId,
     // actions
     handleSend,
     handleKeyDown,
