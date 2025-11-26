@@ -97,22 +97,11 @@ export function useChat(_: UseChatOptions = {}) {
         setConversationId(data.conversation_id);
       }
 
-      if (data.is_complete) {
-        setIsComplete(true);
-        // Add Facebook login message
-        const fbMessage: Message = {
-          id: Date.now().toString() + "-fb",
-          role: "assistant",
-          content: "מעולה! סיימנו את השלבים הראשונים. כעת, בוא נתחבר לפייסבוק כדי שאוכל להריץ את הקמפיינים עבורך 🚀",
-          showFacebookLogin: true,
-        };
-        setMessages((prev) => [...prev, fbMessage]);
-      }
-
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: data.message ?? "…",
+        showFacebookLogin: data.is_complete || false,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {
