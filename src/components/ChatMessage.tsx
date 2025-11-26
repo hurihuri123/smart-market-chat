@@ -56,7 +56,16 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
         </p>
         {message.adPreview && (
           <div className="mt-4">
-            <AdPreview adData={message.adPreview} editable={true} showSubmitButton={true} />
+            <AdPreview
+              adData={message.adPreview}
+              editable={true}
+              showSubmitButton={true}
+              mediaOnly={
+                !message.adPreview.headline &&
+                !message.adPreview.primaryText &&
+                !message.adPreview.buttonText
+              }
+            />
           </div>
         )}
         {message.showFacebookLogin && (

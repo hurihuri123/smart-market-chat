@@ -58,11 +58,11 @@ const MainApp = () => {
       const adMessage = {
         id: Date.now().toString(),
         role: "assistant" as const,
-        content: "הנה דוגמה למודעה שלך! אתה יכול לגרור תמונה או סרטון לשנות את המדיה, ולערוך את הטקסטים:",
+        content: "יאללה בוא נריץ קמפיין חדש, תעלה לי לכאן תמונות או סרטונים שתרצה שאריץ עבורך:",
         adPreview: {
-          headline: "כותרת מושכת שתגרום ללקוחות שלך ללחוץ",
-          primaryText: "זה הטקסט הראשי של המודעה שלך. כאן תספר על המוצר או השירות בצורה מעניינת ומושכת!",
-          buttonText: "המודעה מוכנה",
+          headline: "",
+          primaryText: "",
+          buttonText: "",
         },
       };
       addMessage(adMessage);
@@ -78,11 +78,11 @@ const MainApp = () => {
       const adMessage = {
         id: Date.now().toString(),
         role: "assistant" as const,
-        content: "הנה דוגמה למודעה שלך! אתה יכול לגרור תמונה או סרטון לשנות את המדיה, ולערוך את הטקסטים:",
+        content: "יאללה בוא נריץ קמפיין חדש, תעלה לי לכאן תמונות או סרטונים שתרצה שאריץ עבורך:",
         adPreview: {
-          headline: "כותרת מושכת שתגרום ללקוחות שלך ללחוץ",
-          primaryText: "זה הטקסט הראשי של המודעה שלך. כאן תספר על המוצר או השירות בצורה מעניינת ומושכת!",
-          buttonText: "המודעה מוכנה",
+          headline: "",
+          primaryText: "",
+          buttonText: "",
         },
       };
       addMessage(adMessage);

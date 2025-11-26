@@ -21,9 +21,10 @@ interface AdPreviewProps {
   onUpdate?: (data: AdData) => void;
   editable?: boolean;
   showSubmitButton?: boolean;
+  mediaOnly?: boolean;
 }
 
-export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton = false }: AdPreviewProps) => {
+export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton = false, mediaOnly = false }: AdPreviewProps) => {
   const [localData, setLocalData] = useState<AdData>(adData);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -103,19 +104,21 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
         </div>
 
         {/* Primary Text */}
-        <div className="px-3 pb-3">
-          {editable ? (
-            <textarea
-              value={localData.primaryText}
-              onChange={(e) => handleTextChange("primaryText", e.target.value)}
-              className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary transition-smooth"
-              rows={3}
-              placeholder="הטקסט הראשי של המודעה..."
-            />
-          ) : (
-            <p className="text-[15px] leading-snug">{localData.primaryText}</p>
-          )}
-        </div>
+        {!mediaOnly && (
+          <div className="px-3 pb-3">
+            {editable ? (
+              <textarea
+                value={localData.primaryText}
+                onChange={(e) => handleTextChange("primaryText", e.target.value)}
+                className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary transition-smooth"
+                rows={3}
+                placeholder="הטקסט הראשי של המודעה..."
+              />
+            ) : (
+              <p className="text-[15px] leading-snug">{localData.primaryText}</p>
+            )}
+          </div>
+        )}
 
         {/* Media Section */}
         <div className="relative w-full aspect-[4/3] bg-secondary/20 overflow-hidden">
@@ -228,58 +231,62 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
         )}
 
         {/* Ad Details Card - Facebook style link preview */}
-        <div className="bg-muted/30 border-t border-border p-3 space-y-2.5">
-          {editable ? (
-            <>
-              <input
-                value={localData.headline}
-                onChange={(e) => handleTextChange("headline", e.target.value)}
-                className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:border-primary transition-smooth"
-                placeholder="כותרת המודעה..."
-              />
-              <p className="text-xs text-muted-foreground">yourwebsite.com</p>
-              <input
-                value={localData.buttonText}
-                onChange={(e) => handleTextChange("buttonText", e.target.value)}
-                className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-smooth"
-                placeholder="טקסט הכפתור..."
-              />
-            </>
-          ) : (
-            <>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">yourwebsite.com</p>
-              <p className="text-[15px] font-semibold line-clamp-2 leading-tight">{localData.headline}</p>
-              <button className="w-full bg-muted/70 hover:bg-muted text-foreground font-semibold py-2 px-4 rounded-md text-sm transition-smooth">
-                {localData.buttonText}
-              </button>
-            </>
-          )}
-        </div>
+        {!mediaOnly && (
+          <div className="bg-muted/30 border-t border-border p-3 space-y-2.5">
+            {editable ? (
+              <>
+                <input
+                  value={localData.headline}
+                  onChange={(e) => handleTextChange("headline", e.target.value)}
+                  className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:border-primary transition-smooth"
+                  placeholder="כותרת המודעה..."
+                />
+                <p className="text-xs text-muted-foreground">yourwebsite.com</p>
+                <input
+                  value={localData.buttonText}
+                  onChange={(e) => handleTextChange("buttonText", e.target.value)}
+                  className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary transition-smooth"
+                  placeholder="טקסט הכפתור..."
+                />
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">yourwebsite.com</p>
+                <p className="text-[15px] font-semibold line-clamp-2 leading-tight">{localData.headline}</p>
+                <button className="w-full bg-muted/70 hover:bg-muted text-foreground font-semibold py-2 px-4 rounded-md text-sm transition-smooth">
+                  {localData.buttonText}
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Facebook Engagement Bar */}
-        <div className="border-t border-border px-3 py-2">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <ThumbsUp className="w-3.5 h-3.5" />
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span className="text-xs">0</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <button className="flex items-center gap-2 hover:text-foreground transition-smooth py-1.5">
-                <ThumbsUp className="w-[18px] h-[18px]" />
-                <span className="text-sm font-medium">אהבתי</span>
-              </button>
-              <button className="flex items-center gap-2 hover:text-foreground transition-smooth py-1.5">
-                <MessageCircle className="w-[18px] h-[18px]" />
-                <span className="text-sm font-medium">תגובה</span>
-              </button>
-              <button className="flex items-center gap-2 hover:text-foreground transition-smooth py-1.5">
-                <Share2 className="w-[18px] h-[18px]" />
-                <span className="text-sm font-medium">שיתוף</span>
-              </button>
+        {!mediaOnly && (
+          <div className="border-t border-border px-3 py-2">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <ThumbsUp className="w-3.5 h-3.5" />
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span className="text-xs">0</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <button className="flex items-center gap-2 hover:text-foreground transition-smooth py-1.5">
+                  <ThumbsUp className="w-[18px] h-[18px]" />
+                  <span className="text-sm font-medium">אהבתי</span>
+                </button>
+                <button className="flex items-center gap-2 hover:text-foreground transition-smooth py-1.5">
+                  <MessageCircle className="w-[18px] h-[18px]" />
+                  <span className="text-sm font-medium">תגובה</span>
+                </button>
+                <button className="flex items-center gap-2 hover:text-foreground transition-smooth py-1.5">
+                  <Share2 className="w-[18px] h-[18px]" />
+                  <span className="text-sm font-medium">שיתוף</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Submit Button */}
@@ -287,7 +294,11 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
         <div className="mt-4">
           <Button
             onClick={() => {}}
-            disabled={!localData.headline || !localData.primaryText || !localData.buttonText}
+            disabled={
+              mediaOnly
+                ? !localData.media || localData.media.length === 0
+                : !localData.headline || !localData.primaryText || !localData.buttonText
+            }
             className="w-full gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
             size="lg"
           >
