@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageSquare, BarChart3, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -45,6 +45,26 @@ const MainApp = () => {
   const [fileUploadOpen, setFileUploadOpen] = useState(false);
   const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage } = useChat({ isOnboarding: false });
 
+  // Auto-load ad preview when page loads with chat history
+  useEffect(() => {
+    // Check if there are messages and no ad preview yet
+    const hasAdPreview = messages.some(msg => msg.adPreview);
+    if (messages.length > 0 && !hasAdPreview) {
+      // Automatically show the ad preview
+      const adMessage = {
+        id: Date.now().toString(),
+        role: "assistant" as const,
+        content: "הנה דוגמה למודעה שלך! אתה יכול לגרור תמונה או סרטון לשנות את המדיה, ולערוך את הטקסטים:",
+        adPreview: {
+          headline: "כותרת מושכת שתגרום ללקוחות שלך ללחוץ",
+          primaryText: "זה הטקסט הראשי של המודעה שלך. כאן תספר על המוצר או השירות בצורה מעניינת ומושכת!",
+          buttonText: "המודעה מוכנה",
+        },
+      };
+      addMessage(adMessage);
+    }
+  }, []); // Only run once on mount
+
   const handleQuickAction = (action: string) => {
     if (action === "אני רוצה להתחיל קמפיין חדש") {
       setFileUploadOpen(true);
@@ -57,7 +77,7 @@ const MainApp = () => {
         adPreview: {
           headline: "כותרת מושכת שתגרום ללקוחות שלך ללחוץ",
           primaryText: "זה הטקסט הראשי של המודעה שלך. כאן תספר על המוצר או השירות בצורה מעניינת ומושכת!",
-          buttonText: "לחץ כאן",
+          buttonText: "המודעה מוכנה",
         },
       };
       addMessage(adMessage);
