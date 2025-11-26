@@ -45,12 +45,16 @@ const MainApp = () => {
   const [fileUploadOpen, setFileUploadOpen] = useState(false);
   const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage } = useChat({ isOnboarding: false });
 
-  // Auto-load ad preview when page loads with chat history
+  const [hasAutoCreatedAdPreview, setHasAutoCreatedAdPreview] = useState(false);
+
+  // Auto-run the "צור מודעה" action once, after conversation is loaded
   useEffect(() => {
-    // Check if there are messages and no ad preview yet
-    const hasAdPreview = messages.some(msg => msg.adPreview);
-    if (messages.length > 0 && !hasAdPreview) {
-      // Automatically show the ad preview
+    if (hasAutoCreatedAdPreview) return;
+    if (messages.length === 0) return;
+
+    const hasAdPreview = messages.some((msg) => msg.adPreview);
+    if (!hasAdPreview) {
+      // Same operation as clicking the "CREATE_AD_PREVIEW" quick action
       const adMessage = {
         id: Date.now().toString(),
         role: "assistant" as const,
@@ -62,8 +66,9 @@ const MainApp = () => {
         },
       };
       addMessage(adMessage);
+      setHasAutoCreatedAdPreview(true);
     }
-  }, []); // Only run once on mount
+  }, [messages, hasAutoCreatedAdPreview, addMessage]);
 
   const handleQuickAction = (action: string) => {
     if (action === "אני רוצה להתחיל קמפיין חדש") {
