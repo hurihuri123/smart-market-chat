@@ -12,10 +12,10 @@ type Tab = "chat" | "analytics";
 
 const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }) => {
   const actions = [
-    { label: "📊 בדוק ביצועים", value: "בדוק את ביצועי הקמפיין שלי" },
-    { label: "✨ שפר קמפיין", value: "אני רוצה לשפר את הקמפיין הנוכחי" },
-    { label: "🎯 צור מודעה", value: "CREATE_AD_PREVIEW" },
-    { label: "💡 עצות", value: "תן לי עצות לשיפור" },
+    { label: "📊 בדוק ביצועים", value: "בדוק את ביצועי הקמפיין שלי", disabled: true },
+    { label: "✨ שפר קמפיין", value: "אני רוצה לשפר את הקמפיין הנוכחי", disabled: true },
+    { label: "🎯 צור מודעה", value: "CREATE_AD_PREVIEW", disabled: false },
+    { label: "💡 עצות", value: "תן לי עצות לשיפור", disabled: true },
   ];
 
   return (
@@ -23,9 +23,15 @@ const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }
       {actions.map((action) => (
         <Button
           key={action.value}
-          onClick={() => onAction(action.value)}
+          onClick={() => !action.disabled && onAction(action.value)}
+          disabled={action.disabled}
           variant="outline"
-          className="h-auto py-4 px-6 text-right justify-start glass-effect hover:glass-card border-primary/20 hover:border-primary/40 transition-smooth hover:translate-y-[-2px] hover:shadow-glow"
+          className={cn(
+            "h-auto py-4 px-6 text-right justify-start glass-effect border-primary/20 transition-smooth",
+            action.disabled
+              ? "opacity-60 cursor-not-allowed"
+              : "hover:glass-card hover:border-primary/40 hover:translate-y-[-2px] hover:shadow-glow"
+          )}
         >
           <span className="text-base font-medium">{action.label}</span>
         </Button>
