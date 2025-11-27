@@ -3,6 +3,7 @@ import { Upload, X, Play, MoreHorizontal, ThumbsUp, MessageCircle, Share2, Chevr
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FileUploadDialog } from "./FileUploadDialog";
+import { uploadAdMedia } from "@/services/adService";
 
 interface MediaItem {
   url: string;
@@ -28,6 +29,8 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
   const [localData, setLocalData] = useState<AdData>(adData);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFilesSelected = useCallback(
     (files: File[]) => {
@@ -53,6 +56,8 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
         };
         reader.readAsDataURL(file);
       });
+
+      setUploadedFiles((prev) => [...prev, ...files]);
     },
     [localData, onUpdate]
   );
@@ -82,6 +87,19 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
     const newData = { ...localData, [field]: value };
     setLocalData(newData);
     onUpdate?.(newData);
+  };
+
+  const handleSubmit = async () => {
+    if (!uploadedFiles.length) return;
+    try {
+      setIsSubmitting(true);
+      await uploadAdMedia(uploadedFiles);
+      // For now we only send; further UX (toasts, etc.) can be added later
+    } catch (err) {
+      console.error("Failed to upload ad media:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
 
@@ -293,17 +311,18 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
       {showSubmitButton && (
         <div className="mt-4">
           <Button
-            onClick={() => {}}
+            onClick={handleSubmit}
             disabled={
-              mediaOnly
+              isSubmitting ||
+              (mediaOnly
                 ? !localData.media || localData.media.length === 0
-                : !localData.headline || !localData.primaryText || !localData.buttonText
+                : !localData.headline || !localData.primaryText || !localData.buttonText)
             }
             className="w-full gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
             size="lg"
           >
             <CheckCircle2 className="w-5 h-5 ml-2" />
-            המודעה מוכנה
+            {isSubmitting ? "מעלה..." : "המודעה מוכנה"}
           </Button>
         </div>
       )}
