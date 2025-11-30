@@ -55,14 +55,36 @@ export const FacebookLoginDialog = ({ open, onOpenChange, onSuccess }: FacebookL
 
       // Listen for messages from the popup (after OAuth redirect)
       const handleMessage = (event: MessageEvent) => {
-        // Verify origin for security
-        if (event.origin !== window.location.origin) return;
+        // Verify origin for security: allow frontend + FastAPI backend origins
+        const allowedOrigins = [
+          window.location.origin,
+          "http://localhost:8000",
+        ];
+        if (!allowedOrigins.includes(event.origin)) return;
         
         if (event.data.type === "facebook_auth_success") {
-          if (event.data.access_token) {
-            localStorage.setItem("auth_token", event.data.access_token);
+          // Store tokens in localStorage
+          const user = event.data.user;
+          const token = event.data.access_token || user?.access_token;
+          const refreshToken = user?.refresh_token;
+          const expiresAt = user?.expires_at;
+
+          if (token) {
+            localStorage.setItem("auth_token", token);
+          }
+          if (refreshToken) {
+            localStorage.setItem("refresh_token", refreshToken);
+          }
+          if (expiresAt) {
+            localStorage.setItem("token_expires_at", expiresAt);
+          }
+
+          // Store user data in localStorage as state snapshot
+          if (user) {
+            localStorage.setItem("campainly_user", JSON.stringify(user));
           }
           
+          console.log("FB success payload (dialog):", event.data);
           toast.success("התחברת בהצלחה!");
           onSuccess?.();
           navigate("/app");

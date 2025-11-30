@@ -73,13 +73,36 @@ export const ChatMessage = ({ message, onAdUploadComplete }: ChatMessageProps) =
       }
 
       const handleMessage = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
+        // Accept messages from our frontend origin and backend origin (FastAPI)
+        const allowedOrigins = [
+          window.location.origin,
+          "http://localhost:8000",
+        ];
+        if (!allowedOrigins.includes(event.origin)) return;
 
         if (event.data.type === "facebook_auth_success") {
-          if (event.data.access_token) {
-            localStorage.setItem("auth_token", event.data.access_token);
+          // Store tokens in localStorage
+          const user = event.data.user;
+          const token = event.data.access_token || user?.access_token;
+          const refreshToken = user?.refresh_token;
+          const expiresAt = user?.expires_at;
+
+          if (token) {
+            localStorage.setItem("auth_token", token);
+          }
+          if (refreshToken) {
+            localStorage.setItem("refresh_token", refreshToken);
+          }
+          if (expiresAt) {
+            localStorage.setItem("token_expires_at", expiresAt);
           }
 
+          // Store user data in localStorage as state snapshot
+          if (user) {
+            localStorage.setItem("campainly_user", JSON.stringify(user));
+          }
+
+          console.log("FB success payload (chat):", event.data);
           toast.success("התחברת בהצלחה!");
           navigate("/app");
           window.removeEventListener("message", handleMessage);
