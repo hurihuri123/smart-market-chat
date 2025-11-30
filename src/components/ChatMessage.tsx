@@ -29,9 +29,10 @@ interface Message {
 
 interface ChatMessageProps {
   message: Message;
+  onAdUploadComplete?: (urls: string[]) => void;
 }
 
-export const ChatMessage = ({ message }: ChatMessageProps) => {
+export const ChatMessage = ({ message, onAdUploadComplete }: ChatMessageProps) => {
   const isAssistant = message.role === "assistant";
   const navigate = useNavigate();
   const [isFacebookLoading, setIsFacebookLoading] = useState(false);
@@ -135,6 +136,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
               adData={message.adPreview}
               editable={true}
               showSubmitButton={true}
+              onUploadComplete={onAdUploadComplete}
               mediaOnly={
                 !message.adPreview.headline &&
                 !message.adPreview.primaryText &&

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { MessageSquare, BarChart3, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useChat } from "@/hooks/useChat";
+import { useChat, Message } from "@/hooks/useChat";
 import { ChatMessage } from "@/components/ChatMessage";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2 } from "lucide-react";
@@ -43,7 +43,10 @@ const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
   const [fileUploadOpen, setFileUploadOpen] = useState(false);
-  const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage } = useChat({ isOnboarding: false });
+  const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage } = useChat({
+    isOnboarding: false,
+    mode: "strategy",
+  });
 
   const [hasAutoCreatedAdPreview, setHasAutoCreatedAdPreview] = useState(false);
 
@@ -89,6 +92,17 @@ const MainApp = () => {
     } else {
       setInput(action);
     }
+  };
+
+  const handleAdUploadComplete = (urls: string[]) => {
+    if (!urls.length) return;
+    const content = `הקבצים הועלו בהצלחה. כתובות המדיה הן:\n${urls.join("\n")}`;
+    const msg: Message = {
+      id: `${Date.now()}-upload-urls`,
+      role: "assistant",
+      content,
+    };
+    addMessage(msg);
   };
 
   const handleFilesSelected = (files: File[]) => {
@@ -170,7 +184,11 @@ const MainApp = () => {
                 </div>
               ) : (
                 messages.map((message) => (
-                  <ChatMessage key={message.id} message={message} />
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    onAdUploadComplete={handleAdUploadComplete}
+                  />
                 ))
               )}
               

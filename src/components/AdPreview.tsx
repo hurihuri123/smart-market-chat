@@ -23,9 +23,10 @@ interface AdPreviewProps {
   editable?: boolean;
   showSubmitButton?: boolean;
   mediaOnly?: boolean;
+  onUploadComplete?: (urls: string[]) => void;
 }
 
-export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton = false, mediaOnly = false }: AdPreviewProps) => {
+export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton = false, mediaOnly = false, onUploadComplete }: AdPreviewProps) => {
   const [localData, setLocalData] = useState<AdData>(adData);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -93,8 +94,10 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
     if (!uploadedFiles.length) return;
     try {
       setIsSubmitting(true);
-      await uploadAdMedia(uploadedFiles);
-      // For now we only send; further UX (toasts, etc.) can be added later
+      const res = await uploadAdMedia(uploadedFiles);
+      if (res.media_urls?.length && onUploadComplete) {
+        onUploadComplete(res.media_urls);
+      }
     } catch (err) {
       console.error("Failed to upload ad media:", err);
     } finally {

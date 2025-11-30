@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sendChatMessage, ChatResponse } from "@/services/chatService";
+import { sendChatMessage, sendStrategyMessage, ChatResponse } from "@/services/chatService";
 
 interface MediaItem {
   url: string;
@@ -23,9 +23,10 @@ export interface Message {
 
 interface UseChatOptions {
   isOnboarding?: boolean;
+  mode?: "default" | "strategy";
 }
 
-export function useChat(_: UseChatOptions = {}) {
+export function useChat({ mode = "default" }: UseChatOptions = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -91,7 +92,8 @@ export function useChat(_: UseChatOptions = {}) {
     setIsLoading(true);
 
     try {
-      const data: ChatResponse = await sendChatMessage(userMessage.content, conversationId);
+      const sendFn = mode === "strategy" ? sendStrategyMessage : sendChatMessage;
+      const data: ChatResponse = await sendFn(userMessage.content, conversationId);
 
       if (data.conversation_id && data.conversation_id !== conversationId) {
         setConversationId(data.conversation_id);
@@ -101,7 +103,7 @@ export function useChat(_: UseChatOptions = {}) {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: data.message ?? "…",
-        showFacebookLogin: data.is_complete || false,
+        showFacebookLogin: mode === "default" ? data.is_complete || false : false,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {
