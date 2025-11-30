@@ -43,10 +43,11 @@ const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
   const [fileUploadOpen, setFileUploadOpen] = useState(false);
-  const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage } = useChat({
-    isOnboarding: false,
-    mode: "strategy",
-  });
+  const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage, conversationId } =
+    useChat({
+      isOnboarding: false,
+      mode: "strategy",
+    });
 
   const [hasAutoCreatedAdPreview, setHasAutoCreatedAdPreview] = useState(false);
 
@@ -188,6 +189,7 @@ const MainApp = () => {
                     key={message.id}
                     message={message}
                     onAdUploadComplete={handleAdUploadComplete}
+                    conversationId={conversationId}
                   />
                 ))
               )}

@@ -30,9 +30,10 @@ interface Message {
 interface ChatMessageProps {
   message: Message;
   onAdUploadComplete?: (urls: string[]) => void;
+  conversationId?: string | null;
 }
 
-export const ChatMessage = ({ message, onAdUploadComplete }: ChatMessageProps) => {
+export const ChatMessage = ({ message, onAdUploadComplete, conversationId }: ChatMessageProps) => {
   const isAssistant = message.role === "assistant";
   const navigate = useNavigate();
   const [isFacebookLoading, setIsFacebookLoading] = useState(false);
@@ -40,7 +41,8 @@ export const ChatMessage = ({ message, onAdUploadComplete }: ChatMessageProps) =
   const handleFacebookLogin = async () => {
     setIsFacebookLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/facebook/login`, {
+      const query = conversationId ? `?conversation_id=${encodeURIComponent(conversationId)}` : "";
+      const response = await fetch(`${API_BASE_URL}/auth/facebook/login${query}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -81,7 +83,7 @@ export const ChatMessage = ({ message, onAdUploadComplete }: ChatMessageProps) =
         if (!allowedOrigins.includes(event.origin)) return;
 
         if (event.data.type === "facebook_auth_success") {
-          // Store tokens in localStorage
+          // Store only tokens in localStorage
           const user = event.data.user;
           const token = event.data.access_token || user?.access_token;
           const refreshToken = user?.refresh_token;
@@ -95,11 +97,6 @@ export const ChatMessage = ({ message, onAdUploadComplete }: ChatMessageProps) =
           }
           if (expiresAt) {
             localStorage.setItem("token_expires_at", expiresAt);
-          }
-
-          // Store user data in localStorage as state snapshot
-          if (user) {
-            localStorage.setItem("campainly_user", JSON.stringify(user));
           }
 
           console.log("FB success payload (chat):", event.data);

@@ -12,7 +12,18 @@ interface ChatInterfaceProps {
 }
 
 export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterfaceProps) => {
-  const { messages, input, setInput, isLoading, conversationStep, handleSend, handleKeyDown, currentPlaceholder, progress } = useChat({ isOnboarding });
+  const {
+    messages,
+    input,
+    setInput,
+    isLoading,
+    conversationStep,
+    handleSend,
+    handleKeyDown,
+    currentPlaceholder,
+    progress,
+    conversationId,
+  } = useChat({ isOnboarding });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -74,7 +85,7 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4 min-h-[140px]">
             {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+              <ChatMessage key={message.id} message={message} conversationId={conversationId} />
             ))}
             {isLoading && (
               <div className="flex items-center gap-2 text-muted-foreground">

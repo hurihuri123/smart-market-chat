@@ -63,7 +63,7 @@ export const FacebookLoginDialog = ({ open, onOpenChange, onSuccess }: FacebookL
         if (!allowedOrigins.includes(event.origin)) return;
         
         if (event.data.type === "facebook_auth_success") {
-          // Store tokens in localStorage
+          // Store only tokens in localStorage
           const user = event.data.user;
           const token = event.data.access_token || user?.access_token;
           const refreshToken = user?.refresh_token;
@@ -77,11 +77,6 @@ export const FacebookLoginDialog = ({ open, onOpenChange, onSuccess }: FacebookL
           }
           if (expiresAt) {
             localStorage.setItem("token_expires_at", expiresAt);
-          }
-
-          // Store user data in localStorage as state snapshot
-          if (user) {
-            localStorage.setItem("campainly_user", JSON.stringify(user));
           }
           
           console.log("FB success payload (dialog):", event.data);
