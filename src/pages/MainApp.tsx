@@ -7,6 +7,7 @@ import { ChatMessage } from "@/components/ChatMessage";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2 } from "lucide-react";
 import { FileUploadDialog } from "@/components/FileUploadDialog";
+import { fetchUserMessages } from "@/services/messageService";
 
 type Tab = "chat" | "analytics";
 
@@ -48,11 +49,48 @@ const MainApp = () => {
       isOnboarding: false,
       mode: "strategy",
     });
+  const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
 
   const [hasAutoCreatedAdPreview, setHasAutoCreatedAdPreview] = useState(false);
 
-  // Auto-run the "צור מודעה" action once, after conversation is loaded
+  // Load chat history from backend when /app loads
   useEffect(() => {
+    if (hasLoadedHistory) return;
+
+    const loadHistory = async () => {
+      try {
+        const stored = await fetchUserMessages();
+        if (stored.length) {
+          for (const m of stored) {
+            const [maybeRole, ...rest] = m.content.split(": ");
+            let role: "user" | "assistant" = "assistant";
+            let text = m.content;
+            if (maybeRole === "user" || maybeRole === "assistant") {
+              role = maybeRole;
+              text = rest.join(": ");
+            }
+            const msg: Message = {
+              id: String(m.id),
+              role,
+              content: text,
+            };
+            addMessage(msg);
+          }
+        }
+      } catch (e) {
+        // Silently ignore; /app will just start fresh
+        console.error("Failed to load messages from backend", e);
+      } finally {
+        setHasLoadedHistory(true);
+      }
+    };
+
+    loadHistory();
+  }, [addMessage, hasLoadedHistory]);
+
+  // Auto-run the "צור מודעה" action once, after history (if any) is loaded
+  useEffect(() => {
+    if (!hasLoadedHistory) return;
     if (hasAutoCreatedAdPreview) return;
     if (messages.length === 0) return;
 
@@ -72,7 +110,7 @@ const MainApp = () => {
       addMessage(adMessage);
       setHasAutoCreatedAdPreview(true);
     }
-  }, [messages, hasAutoCreatedAdPreview, addMessage]);
+  }, [messages, hasAutoCreatedAdPreview, addMessage, hasLoadedHistory]);
 
   const handleQuickAction = (action: string) => {
     if (action === "אני רוצה להתחיל קמפיין חדש") {
