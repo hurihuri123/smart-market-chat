@@ -20,6 +20,7 @@ export interface Message {
   showFacebookLogin?: boolean;
   adPreview?: AdData;
   isStrategyAd?: boolean;
+  strategyAds?: AdData[]; // Multiple ads from strategy (up to 3)
 }
 
 interface UseChatOptions {

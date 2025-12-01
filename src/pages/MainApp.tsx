@@ -145,6 +145,21 @@ const MainApp = () => {
     };
     addMessage(msg);
 
+    // Convert uploaded URLs to MediaItem format
+    const mediaItems: { url: string; type: "image" | "video" }[] = urls.map((url) => {
+      const lowerUrl = url.toLowerCase();
+      const isVideo =
+        lowerUrl.endsWith(".mp4") ||
+        lowerUrl.endsWith(".mov") ||
+        lowerUrl.endsWith(".avi") ||
+        lowerUrl.endsWith(".mkv") ||
+        lowerUrl.endsWith(".webm");
+      return {
+        url,
+        type: isVideo ? "video" : "image",
+      };
+    });
+
     // After media upload, automatically send brief + media info to the strategy agent
     try {
       setIsStrategyLoading(true);
@@ -153,40 +168,81 @@ const MainApp = () => {
         setConversationId(response.conversation_id);
       }
       let strategyContent = response.message ?? "…";
-      let adPreview: Message["adPreview"] | undefined;
+      let strategyAds: Message["strategyAds"] | undefined;
 
       if (response.strategy_schema && typeof response.strategy_schema === "object") {
         const schema: any = response.strategy_schema;
-        const adSource =
-          Array.isArray(schema.ads) && schema.ads.length > 0 ? schema.ads[0] : schema;
+        
+        // Extract ads array (up to 3)
+        let adsArray: any[] = [];
+        if (Array.isArray(schema.ads)) {
+          adsArray = schema.ads.slice(0, 3); // Limit to 3 ads
+        } else if (Array.isArray(schema)) {
+          adsArray = schema.slice(0, 3);
+        } else {
+          // Single ad object
+          adsArray = [schema];
+        }
 
-        adPreview = {
-          headline:
-            adSource.headline ??
-            adSource.title ??
-            "",
-          primaryText:
-            adSource.primaryText ??
-            adSource.primary_text ??
-            adSource.body ??
-            "",
-          buttonText:
-            adSource.buttonText ??
-            adSource.cta ??
-            adSource.cta_text ??
-            "למידע נוסף",
-        };
+        // Convert each ad to AdData format with media
+        strategyAds = adsArray.map((adSource, index) => {
+          // Distribute media across ads more intelligently
+          let adMedia: { url: string; type: "image" | "video" }[] = [];
+          
+          if (mediaItems.length > 0) {
+            if (adsArray.length === 1) {
+              // Single ad gets all media
+              adMedia = mediaItems;
+            } else if (adsArray.length === 2) {
+              // Two ads: split media roughly in half
+              const midPoint = Math.ceil(mediaItems.length / 2);
+              adMedia = index === 0 ? mediaItems.slice(0, midPoint) : mediaItems.slice(midPoint);
+            } else {
+              // Three ads: distribute evenly
+              const perAd = Math.ceil(mediaItems.length / 3);
+              const start = index * perAd;
+              const end = Math.min(start + perAd, mediaItems.length);
+              adMedia = mediaItems.slice(start, end);
+            }
+          }
 
-        // If we successfully parsed a strategy ad, replace raw JSON content with a friendly label
-        strategyContent = "הנה מודעת פייסבוק שהכנתי עבורך על בסיס הבריף והמדיה:";
+          return {
+            headline:
+              adSource.headline ??
+              adSource.title ??
+              adSource.headline_text ??
+              "",
+            primaryText:
+              adSource.primaryText ??
+              adSource.primary_text ??
+              adSource.body ??
+              adSource.description ??
+              adSource.text ??
+              "",
+            buttonText:
+              adSource.buttonText ??
+              adSource.cta ??
+              adSource.cta_text ??
+              adSource.call_to_action ??
+              "למידע נוסף",
+            media: adMedia.length > 0 ? adMedia : undefined,
+          };
+        });
+
+        // If we successfully parsed strategy ads, replace raw JSON content with a friendly label
+        const adCount = strategyAds.length;
+        strategyContent =
+          adCount === 1
+            ? "הנה מודעת פייסבוק שהכנתי עבורך על בסיס הבריף והמדיה:"
+            : `הנה ${adCount} מודעות פייסבוק שהכנתי עבורך על בסיס הבריף והמדיה:`;
       }
 
       const strategyMsg: Message = {
         id: `${Date.now()}-strategy-response`,
         role: "assistant",
         content: strategyContent,
-        adPreview,
-        isStrategyAd: !!adPreview,
+        strategyAds,
+        isStrategyAd: !!strategyAds && strategyAds.length > 0,
       };
       addMessage(strategyMsg);
     } catch (e) {

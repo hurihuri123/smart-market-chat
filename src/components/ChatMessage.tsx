@@ -26,6 +26,7 @@ interface Message {
   showFacebookLogin?: boolean;
   adPreview?: AdData;
   isStrategyAd?: boolean;
+  strategyAds?: AdData[]; // Multiple ads from strategy (up to 3)
 }
 
 interface ChatMessageProps {
@@ -151,7 +152,22 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId }: Cha
         <p className="text-sm md:text-base whitespace-pre-wrap leading-relaxed">
           {message.content}
         </p>
-        {message.adPreview && (
+        {/* Render multiple strategy ads */}
+        {message.strategyAds && message.strategyAds.length > 0 && (
+          <div className="mt-4 space-y-4">
+            {message.strategyAds.map((ad, index) => (
+              <AdPreview
+                key={index}
+                adData={ad}
+                editable={false}
+                showSubmitButton={false}
+                mediaOnly={false}
+              />
+            ))}
+          </div>
+        )}
+        {/* Render single ad preview (for backward compatibility) */}
+        {message.adPreview && !message.strategyAds && (
           <div className="mt-4">
             <AdPreview
               adData={message.adPreview}
