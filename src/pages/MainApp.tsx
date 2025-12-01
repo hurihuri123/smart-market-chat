@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useChat, Message } from "@/hooks/useChat";
 import { ChatMessage } from "@/components/ChatMessage";
+import { TypingIndicator } from "@/components/TypingIndicator";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Loader2 } from "lucide-react";
+import { Send } from "lucide-react";
 import { FileUploadDialog } from "@/components/FileUploadDialog";
 import { fetchUserMessages } from "@/services/messageService";
 import { sendStrategyBriefAndMedia } from "@/services/chatService";
@@ -51,8 +52,8 @@ const MainApp = () => {
       mode: "strategy",
     });
   const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
-
   const [hasAutoCreatedAdPreview, setHasAutoCreatedAdPreview] = useState(false);
+  const [isStrategyLoading, setIsStrategyLoading] = useState(false);
 
   // Load chat history from backend when /app loads
   useEffect(() => {
@@ -146,6 +147,7 @@ const MainApp = () => {
 
     // After media upload, automatically send brief + media info to the strategy agent
     try {
+      setIsStrategyLoading(true);
       const response = await sendStrategyBriefAndMedia(conversationId ?? undefined);
       if (response.conversation_id && response.conversation_id !== conversationId) {
         setConversationId(response.conversation_id);
@@ -158,6 +160,8 @@ const MainApp = () => {
       addMessage(strategyMsg);
     } catch (e) {
       console.error("Failed to send brief + media to strategy agent", e);
+    } finally {
+      setIsStrategyLoading(false);
     }
   };
 
@@ -249,10 +253,9 @@ const MainApp = () => {
                 ))
               )}
               
-              {isLoading && (
-                <div className="flex items-center gap-2 text-muted-foreground animate-in fade-in">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">חושב...</span>
+              {isStrategyLoading && (
+                <div className="animate-in fade-in">
+                  <TypingIndicator text="בונה לך אסטרטגיה לקמפיין חדש..." />
                 </div>
               )}
             </div>

@@ -1,10 +1,11 @@
 import { useRef, useEffect } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage } from "./ChatMessage";
 import { Progress } from "@/components/ui/progress";
 import { useChat } from "@/hooks/useChat";
+import { TypingIndicator } from "@/components/TypingIndicator";
 
 interface ChatInterfaceProps {
   isOnboarding?: boolean;
@@ -88,9 +89,8 @@ export const ChatInterface = ({ isOnboarding = true, onComplete }: ChatInterface
               <ChatMessage key={message.id} message={message} conversationId={conversationId} />
             ))}
             {isLoading && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">חושב...</span>
+              <div className="animate-in fade-in">
+                <TypingIndicator />
               </div>
             )}
             <div ref={messagesEndRef} />
