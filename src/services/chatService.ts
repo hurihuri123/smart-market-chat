@@ -8,9 +8,14 @@ export interface ChatResponse {
 }
 
 export async function sendChatMessage(message: string, conversationId?: string | null): Promise<ChatResponse> {
+  const token = localStorage.getItem("auth_token");
+
   const res = await fetch(`${API_BASE_URL}/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify({
       message,
       ...(conversationId ? { conversation_id: conversationId } : {}),
