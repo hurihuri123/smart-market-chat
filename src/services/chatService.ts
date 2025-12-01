@@ -40,3 +40,28 @@ export async function sendStrategyMessage(message: string, conversationId?: stri
 
   return (await res.json()) as ChatResponse;
 }
+
+export async function sendStrategyBriefAndMedia(conversationId?: string | null): Promise<ChatResponse> {
+  const token = localStorage.getItem("auth_token");
+  if (!token) {
+    throw new Error("Missing auth token for strategy brief and media call");
+  }
+
+  const res = await fetch(`${API_BASE_URL}/chat/strategy/brief_and_media`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      message: "",
+      ...(conversationId ? { conversation_id: conversationId } : {}),
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Request failed: ${res.status}`);
+  }
+
+  return (await res.json()) as ChatResponse;
+}

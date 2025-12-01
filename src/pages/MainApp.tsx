@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2 } from "lucide-react";
 import { FileUploadDialog } from "@/components/FileUploadDialog";
 import { fetchUserMessages } from "@/services/messageService";
+import { sendStrategyBriefAndMedia } from "@/services/chatService";
 
 type Tab = "chat" | "analytics";
 
@@ -44,7 +45,7 @@ const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
   const [fileUploadOpen, setFileUploadOpen] = useState(false);
-  const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage, conversationId } =
+  const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage, conversationId, setConversationId } =
     useChat({
       isOnboarding: false,
       mode: "strategy",
@@ -133,7 +134,7 @@ const MainApp = () => {
     }
   };
 
-  const handleAdUploadComplete = (urls: string[]) => {
+  const handleAdUploadComplete = async (urls: string[]) => {
     if (!urls.length) return;
     const content = `הקבצים הועלו בהצלחה. כתובות המדיה הן:\n${urls.join("\n")}`;
     const msg: Message = {
@@ -142,6 +143,22 @@ const MainApp = () => {
       content,
     };
     addMessage(msg);
+
+    // After media upload, automatically send brief + media info to the strategy agent
+    try {
+      const response = await sendStrategyBriefAndMedia(conversationId ?? undefined);
+      if (response.conversation_id && response.conversation_id !== conversationId) {
+        setConversationId(response.conversation_id);
+      }
+      const strategyMsg: Message = {
+        id: `${Date.now()}-strategy-response`,
+        role: "assistant",
+        content: response.message ?? "…",
+      };
+      addMessage(strategyMsg);
+    } catch (e) {
+      console.error("Failed to send brief + media to strategy agent", e);
+    }
   };
 
   const handleFilesSelected = (files: File[]) => {

@@ -16,8 +16,13 @@ export async function uploadAdMedia(files: File[]): Promise<AdUploadResponse> {
     formData.append("media", file);
   }
 
+  const token = localStorage.getItem("auth_token");
+
   const res = await fetch(`${API_BASE_URL}/ads`, {
     method: "POST",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: formData,
   });
 
