@@ -25,6 +25,7 @@ interface Message {
   content: string;
   showFacebookLogin?: boolean;
   adPreview?: AdData;
+  isStrategyAd?: boolean;
 }
 
 interface ChatMessageProps {
@@ -154,8 +155,8 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId }: Cha
           <div className="mt-4">
             <AdPreview
               adData={message.adPreview}
-              editable={true}
-              showSubmitButton={true}
+              editable={!message.isStrategyAd}
+              showSubmitButton={!message.isStrategyAd}
               onUploadComplete={onAdUploadComplete}
               mediaOnly={
                 !message.adPreview.headline &&

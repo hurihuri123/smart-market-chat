@@ -152,10 +152,41 @@ const MainApp = () => {
       if (response.conversation_id && response.conversation_id !== conversationId) {
         setConversationId(response.conversation_id);
       }
+      let strategyContent = response.message ?? "…";
+      let adPreview: Message["adPreview"] | undefined;
+
+      if (response.strategy_schema && typeof response.strategy_schema === "object") {
+        const schema: any = response.strategy_schema;
+        const adSource =
+          Array.isArray(schema.ads) && schema.ads.length > 0 ? schema.ads[0] : schema;
+
+        adPreview = {
+          headline:
+            adSource.headline ??
+            adSource.title ??
+            "",
+          primaryText:
+            adSource.primaryText ??
+            adSource.primary_text ??
+            adSource.body ??
+            "",
+          buttonText:
+            adSource.buttonText ??
+            adSource.cta ??
+            adSource.cta_text ??
+            "למידע נוסף",
+        };
+
+        // If we successfully parsed a strategy ad, replace raw JSON content with a friendly label
+        strategyContent = "הנה מודעת פייסבוק שהכנתי עבורך על בסיס הבריף והמדיה:";
+      }
+
       const strategyMsg: Message = {
         id: `${Date.now()}-strategy-response`,
         role: "assistant",
-        content: response.message ?? "…",
+        content: strategyContent,
+        adPreview,
+        isStrategyAd: !!adPreview,
       };
       addMessage(strategyMsg);
     } catch (e) {

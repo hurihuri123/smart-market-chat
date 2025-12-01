@@ -19,6 +19,7 @@ export interface Message {
   content: string;
   showFacebookLogin?: boolean;
   adPreview?: AdData;
+  isStrategyAd?: boolean;
 }
 
 interface UseChatOptions {
