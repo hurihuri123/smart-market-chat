@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageSquare, BarChart3, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -54,6 +54,12 @@ const MainApp = () => {
   const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
   const [hasAutoCreatedAdPreview, setHasAutoCreatedAdPreview] = useState(false);
   const [isStrategyLoading, setIsStrategyLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   // Load chat history from backend when /app loads
   useEffect(() => {
@@ -167,83 +173,168 @@ const MainApp = () => {
       if (response.conversation_id && response.conversation_id !== conversationId) {
         setConversationId(response.conversation_id);
       }
-      let strategyContent = response.message ?? "…";
+      // Don't show raw JSON - we'll replace this with a friendly message
+      let strategyContent = "";
       let strategyAds: Message["strategyAds"] | undefined;
 
+      // Debug logging
+      console.log("Strategy response:", response);
+      console.log("Strategy schema:", response.strategy_schema);
+
+      // Try to parse strategy_schema from response, or parse from message if schema is missing
+      let schema = null;
       if (response.strategy_schema && typeof response.strategy_schema === "object") {
-        const schema: any = response.strategy_schema;
-        
-        // Extract ads array (up to 3)
-        let adsArray: any[] = [];
-        if (Array.isArray(schema.ads)) {
-          adsArray = schema.ads.slice(0, 3); // Limit to 3 ads
-        } else if (Array.isArray(schema)) {
-          adsArray = schema.slice(0, 3);
-        } else {
-          // Single ad object
-          adsArray = [schema];
-        }
-
-        // Convert each ad to AdData format with media
-        strategyAds = adsArray.map((adSource, index) => {
-          // Distribute media across ads more intelligently
-          let adMedia: { url: string; type: "image" | "video" }[] = [];
-          
-          if (mediaItems.length > 0) {
-            if (adsArray.length === 1) {
-              // Single ad gets all media
-              adMedia = mediaItems;
-            } else if (adsArray.length === 2) {
-              // Two ads: split media roughly in half
-              const midPoint = Math.ceil(mediaItems.length / 2);
-              adMedia = index === 0 ? mediaItems.slice(0, midPoint) : mediaItems.slice(midPoint);
-            } else {
-              // Three ads: distribute evenly
-              const perAd = Math.ceil(mediaItems.length / 3);
-              const start = index * perAd;
-              const end = Math.min(start + perAd, mediaItems.length);
-              adMedia = mediaItems.slice(start, end);
-            }
+        schema = response.strategy_schema;
+      } else {
+        // Fallback: try to parse JSON from the message itself
+        try {
+          // Try to extract JSON from markdown code blocks or plain JSON
+          let jsonStr = response.message;
+          // Remove markdown code blocks if present
+          jsonStr = jsonStr.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+          // Try to find JSON object in the string
+          const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            schema = JSON.parse(jsonMatch[0]);
+            console.log("Parsed schema from message:", schema);
           }
-
-          return {
-            headline:
-              adSource.headline ??
-              adSource.title ??
-              adSource.headline_text ??
-              "",
-            primaryText:
-              adSource.primaryText ??
-              adSource.primary_text ??
-              adSource.body ??
-              adSource.description ??
-              adSource.text ??
-              "",
-            buttonText:
-              adSource.buttonText ??
-              adSource.cta ??
-              adSource.cta_text ??
-              adSource.call_to_action ??
-              "למידע נוסף",
-            media: adMedia.length > 0 ? adMedia : undefined,
-          };
-        });
-
-        // If we successfully parsed strategy ads, replace raw JSON content with a friendly label
-        const adCount = strategyAds.length;
-        strategyContent =
-          adCount === 1
-            ? "הנה מודעת פייסבוק שהכנתי עבורך על בסיס הבריף והמדיה:"
-            : `הנה ${adCount} מודעות פייסבוק שהכנתי עבורך על בסיס הבריף והמדיה:`;
+        } catch (e) {
+          console.error("Failed to parse JSON from message:", e);
+        }
       }
 
+      if (schema && typeof schema === "object") {
+        // Extract creative section from strategy JSON
+        const creative = schema.creative || schema;
+        
+        // Parse the creative section with arrays
+        const headlines = Array.isArray(creative.headlines) ? creative.headlines : [];
+        const primaryTexts = Array.isArray(creative.primary_texts) ? creative.primary_texts : [];
+        const descriptions = Array.isArray(creative.descriptions) ? creative.descriptions : [];
+        const hooks = Array.isArray(creative.hooks) ? creative.hooks : [];
+        const cta = creative.cta || creative.buttonText || "למידע נוסף";
+        
+        // Get media from creative.media_assets (preferred) or fallback to uploaded media
+        let strategyMedia: { url: string; type: "image" | "video" }[] = [];
+        if (creative.media_assets) {
+          const selectedImages = Array.isArray(creative.media_assets.selected_images)
+            ? creative.media_assets.selected_images
+            : [];
+          const selectedVideos = Array.isArray(creative.media_assets.selected_videos)
+            ? creative.media_assets.selected_videos
+            : [];
+          
+          strategyMedia = [
+            ...selectedImages.map((url: string) => ({ url, type: "image" as const })),
+            ...selectedVideos.map((url: string) => ({ url, type: "video" as const })),
+          ];
+        }
+        
+        // Use strategy media if available, otherwise fallback to uploaded media
+        const availableMedia = strategyMedia.length > 0 ? strategyMedia : mediaItems;
+        
+        // Determine number of ads (up to 3) based on available content
+        const maxAds = Math.min(
+          3,
+          Math.max(
+            headlines.length,
+            primaryTexts.length,
+            descriptions.length,
+            hooks.length
+          )
+        );
+        
+        // Only create ads if we have at least some content
+        if (maxAds > 0) {
+          // Create ads by pairing arrays at same index
+          strategyAds = [];
+          for (let i = 0; i < maxAds; i++) {
+            // Get headline from headlines array, with fallbacks
+            const headline = headlines[i] || hooks[i] || descriptions[i] || "";
+            
+            // Get primary text from primary_texts array
+            const primaryText = primaryTexts[i] || "";
+            
+            // Get description - combine with primary text for richer content
+            const description = descriptions[i] || "";
+            
+            // Combine primary text and description (description as additional context)
+            const combinedPrimaryText = description
+              ? `${primaryText}${primaryText ? "\n\n" : ""}${description}`
+              : primaryText;
+            
+            // Distribute media across ads
+            let adMedia: { url: string; type: "image" | "video" }[] = [];
+            if (availableMedia.length > 0) {
+              if (maxAds === 1) {
+                // Single ad gets all media
+                adMedia = availableMedia;
+              } else if (maxAds === 2) {
+                // Two ads: split media roughly in half
+                const midPoint = Math.ceil(availableMedia.length / 2);
+                adMedia = i === 0 ? availableMedia.slice(0, midPoint) : availableMedia.slice(midPoint);
+              } else {
+                // Three ads: distribute evenly
+                const perAd = Math.ceil(availableMedia.length / 3);
+                const start = i * perAd;
+                const end = Math.min(start + perAd, availableMedia.length);
+                adMedia = availableMedia.slice(start, end);
+              }
+            }
+            
+            // Only add ad if it has at least a headline or primary text
+            if (headline || primaryText || description) {
+              strategyAds.push({
+                headline: headline || "מודעה",
+                primaryText: combinedPrimaryText || headline || "",
+                buttonText: cta || "למידע נוסף",
+                media: adMedia.length > 0 ? adMedia : undefined,
+              });
+            }
+          }
+          
+          // If no ads were created but we have content, create at least one ad with available data
+          if (strategyAds.length === 0 && (headlines.length > 0 || primaryTexts.length > 0)) {
+            strategyAds.push({
+              headline: headlines[0] || hooks[0] || descriptions[0] || "מודעה",
+              primaryText: primaryTexts[0] || descriptions[0] || "",
+              buttonText: cta,
+              media: availableMedia.length > 0 ? availableMedia : undefined,
+            });
+          }
+        }
+
+        // If we successfully parsed strategy ads, replace raw JSON content with a friendly label
+        const adCount = strategyAds?.length || 0;
+        if (adCount > 0) {
+          // Don't show the raw JSON - only show friendly message
+          strategyContent =
+            adCount === 1
+              ? "הנה מודעת פייסבוק שהכנתי עבורך על בסיס הבריף והמדיה:"
+              : `הנה ${adCount} מודעות פייסבוק שהכנתי עבורך על בסיס הבריף והמדיה:`;
+          
+          console.log("Created strategy ads:", strategyAds);
+        } else {
+          console.warn("Strategy schema parsed but no ads were created");
+          // If no ads were created, show a generic message instead of raw JSON
+          strategyContent = "הכנתי עבורך אסטרטגיית קמפיין, אך לא הצלחתי ליצור מודעות. אנא נסה שוב.";
+        }
+      } else {
+        console.warn("No strategy schema found or parsing failed");
+        // If parsing failed, show a generic message instead of raw JSON
+        strategyContent = "הכנתי עבורך אסטרטגיית קמפיין. אנא בדוק את הפרטים.";
+      }
+
+      // Only add message if we have ads to show, otherwise show error message
       const strategyMsg: Message = {
         id: `${Date.now()}-strategy-response`,
         role: "assistant",
         content: strategyContent,
-        strategyAds,
+        strategyAds: strategyAds && strategyAds.length > 0 ? strategyAds : undefined,
         isStrategyAd: !!strategyAds && strategyAds.length > 0,
       };
+      
+      console.log("Adding strategy message to chat:", strategyMsg);
       addMessage(strategyMsg);
     } catch (e) {
       console.error("Failed to send brief + media to strategy agent", e);
@@ -345,6 +436,7 @@ const MainApp = () => {
                   <TypingIndicator text="בונה לך אסטרטגיה לקמפיין חדש..." />
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}
