@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Upload, X, Play, MoreHorizontal, ThumbsUp, MessageCircle, Share2, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Upload, X, Play, ThumbsUp, MessageCircle, Share2, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FileUploadDialog } from "./FileUploadDialog";
@@ -120,7 +120,7 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
             </div>
           </div>
           <button className="w-9 h-9 rounded-full hover:bg-muted/50 flex items-center justify-center transition-smooth">
-            <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
+            <span className="text-lg text-muted-foreground">✎</span>
           </button>
         </div>
 
