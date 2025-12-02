@@ -146,7 +146,9 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
             )}
             title={isEditing ? "סיים עריכה" : "ערוך"}
           >
-            <span className={cn("text-lg transition-smooth", isEditing ? "text-primary" : "text-muted-foreground")}>✎</span>
+            <span className={cn("text-lg transition-smooth", isEditing ? "text-primary" : "text-muted-foreground")}>
+              {isEditing ? "✓" : "✎"}
+            </span>
           </button>
         </div>
 
