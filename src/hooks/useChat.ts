@@ -10,6 +10,7 @@ interface AdData {
   media?: MediaItem[];
   headline: string;
   primaryText: string;
+  description?: string;
   buttonText: string;
 }
 

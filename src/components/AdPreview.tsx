@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Upload, X, Play, ThumbsUp, MessageCircle, Share2, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ interface AdData {
   media?: MediaItem[];
   headline: string;
   primaryText: string;
+  description?: string;
   buttonText: string;
 }
 
@@ -32,6 +33,15 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Update localData when adData prop changes
+  useEffect(() => {
+    setLocalData(adData);
+  }, [adData]);
+  
+  // Determine if fields should be editable (either from prop or edit mode)
+  const isEditable = editable || isEditing;
 
   const handleFilesSelected = useCallback(
     (files: File[]) => {
@@ -119,15 +129,22 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
               <span className="text-xs text-muted-foreground">· ממומן</span>
             </div>
           </div>
-          <button className="w-9 h-9 rounded-full hover:bg-muted/50 flex items-center justify-center transition-smooth">
-            <span className="text-lg text-muted-foreground">✎</span>
+          <button 
+            onClick={() => setIsEditing(!isEditing)}
+            className={cn(
+              "w-9 h-9 rounded-full hover:bg-muted/50 flex items-center justify-center transition-smooth",
+              isEditing && "bg-primary/20"
+            )}
+            title={isEditing ? "סיים עריכה" : "ערוך"}
+          >
+            <span className={cn("text-lg transition-smooth", isEditing ? "text-primary" : "text-muted-foreground")}>✎</span>
           </button>
         </div>
 
         {/* Primary Text */}
         {!mediaOnly && (
-          <div className="px-3 pb-3">
-            {editable ? (
+          <div className="px-3 pb-3 space-y-2">
+            {isEditable ? (
               <textarea
                 value={localData.primaryText}
                 onChange={(e) => handleTextChange("primaryText", e.target.value)}
@@ -137,6 +154,32 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
               />
             ) : (
               <p className="text-[15px] leading-snug">{localData.primaryText}</p>
+            )}
+            {/* Description Text */}
+            {localData.description && (
+              <>
+                {isEditable ? (
+                  <textarea
+                    value={localData.description}
+                    onChange={(e) => handleTextChange("description", e.target.value)}
+                    className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary transition-smooth"
+                    rows={2}
+                    placeholder="תיאור נוסף..."
+                  />
+                ) : (
+                  <p className="text-[14px] text-muted-foreground leading-snug">{localData.description}</p>
+                )}
+              </>
+            )}
+            {/* Show description input even if empty when editing */}
+            {isEditable && !localData.description && (
+              <textarea
+                value=""
+                onChange={(e) => handleTextChange("description", e.target.value)}
+                className="w-full bg-secondary/60 border border-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary transition-smooth"
+                rows={2}
+                placeholder="תיאור נוסף (אופציונלי)..."
+              />
             )}
           </div>
         )}
@@ -254,7 +297,7 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
         {/* Ad Details Card - Facebook style link preview */}
         {!mediaOnly && (
           <div className="bg-muted/30 border-t border-border p-3 space-y-2.5">
-            {editable ? (
+            {isEditable ? (
               <>
                 <input
                   value={localData.headline}

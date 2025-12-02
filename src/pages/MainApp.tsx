@@ -255,13 +255,8 @@ const MainApp = () => {
             // Get primary text from primary_texts array
             const primaryText = primaryTexts[i] || "";
             
-            // Get description - combine with primary text for richer content
+            // Get description separately (not combined with primary text)
             const description = descriptions[i] || "";
-            
-            // Combine primary text and description (description as additional context)
-            const combinedPrimaryText = description
-              ? `${primaryText}${primaryText ? "\n\n" : ""}${description}`
-              : primaryText;
             
             // Distribute media across ads
             let adMedia: { url: string; type: "image" | "video" }[] = [];
@@ -286,7 +281,8 @@ const MainApp = () => {
             if (headline || primaryText || description) {
               strategyAds.push({
                 headline: headline || "מודעה",
-                primaryText: combinedPrimaryText || headline || "",
+                primaryText: primaryText || "",
+                description: description || undefined,
                 buttonText: cta || "למידע נוסף",
                 media: adMedia.length > 0 ? adMedia : undefined,
               });
@@ -297,7 +293,8 @@ const MainApp = () => {
           if (strategyAds.length === 0 && (headlines.length > 0 || primaryTexts.length > 0)) {
             strategyAds.push({
               headline: headlines[0] || hooks[0] || descriptions[0] || "מודעה",
-              primaryText: primaryTexts[0] || descriptions[0] || "",
+              primaryText: primaryTexts[0] || "",
+              description: descriptions[0] || undefined,
               buttonText: cta,
               media: availableMedia.length > 0 ? availableMedia : undefined,
             });
