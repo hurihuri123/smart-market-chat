@@ -34,9 +34,11 @@ interface ChatMessageProps {
   message: Message;
   onAdUploadComplete?: (urls: string[]) => void;
   conversationId?: string | null;
+  onCampaignReady?: () => void;
+  onStrategyAdUpdate?: (adIndex: number, updatedAd: AdData) => void;
 }
 
-export const ChatMessage = ({ message, onAdUploadComplete, conversationId }: ChatMessageProps) => {
+export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCampaignReady, onStrategyAdUpdate }: ChatMessageProps) => {
   const isAssistant = message.role === "assistant";
   const navigate = useNavigate();
   const [isFacebookLoading, setIsFacebookLoading] = useState(false);
@@ -165,6 +167,11 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId }: Cha
                 editable={false}
                 showSubmitButton={false}
                 mediaOnly={false}
+                onUpdate={(updatedAd) => {
+                  if (onStrategyAdUpdate) {
+                    onStrategyAdUpdate(index, updatedAd);
+                  }
+                }}
               />
             ))}
           </div>
@@ -197,8 +204,9 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId }: Cha
         {message.showCampaignReadyButton && (
           <Button
             onClick={() => {
-              // Handle campaign ready - will be implemented
-              console.log("Campaign ready button clicked");
+              if (onCampaignReady) {
+                onCampaignReady();
+              }
             }}
             className="mt-4 w-full min-w-[300px] py-6 px-8 text-lg font-semibold gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
           >

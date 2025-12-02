@@ -55,6 +55,8 @@ const MainApp = () => {
   const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
   const [hasAutoCreatedAdPreview, setHasAutoCreatedAdPreview] = useState(false);
   const [isStrategyLoading, setIsStrategyLoading] = useState(false);
+  const [originalStrategyJson, setOriginalStrategyJson] = useState<Record<string, unknown> | null>(null);
+  const [currentStrategyAds, setCurrentStrategyAds] = useState<Message["strategyAds"]>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages change
@@ -217,6 +219,9 @@ const MainApp = () => {
       }
 
       if (schema && typeof schema === "object") {
+        // Store original strategy JSON for later updates
+        setOriginalStrategyJson(schema);
+        
         // Extract creative section from strategy JSON
         const creative = schema.creative || schema;
         
@@ -378,6 +383,11 @@ const MainApp = () => {
         strategyContent = "הכנתי עבורך אסטרטגיית קמפיין. אנא בדוק את הפרטים.";
       }
 
+      // Store current strategy ads for the save button
+      if (strategyAds && strategyAds.length > 0) {
+        setCurrentStrategyAds(strategyAds);
+      }
+
       // Only add message if we have ads to show, otherwise show error message
       const strategyMsg: Message = {
         id: `${Date.now()}-strategy-response`,
@@ -404,6 +414,78 @@ const MainApp = () => {
       console.error("Failed to send brief + media to strategy agent", e);
     } finally {
       setIsStrategyLoading(false);
+    }
+  };
+
+  const handleCampaignReady = async () => {
+    if (!originalStrategyJson) {
+      console.error("Cannot save campaign: missing strategy JSON");
+      return;
+    }
+
+    // Use current strategy ads (which may have been edited)
+    const adsToSave = currentStrategyAds;
+    if (!adsToSave || adsToSave.length === 0) {
+      console.error("Cannot save campaign: no strategy ads found");
+      return;
+    }
+
+    try {
+      // Update the strategy JSON with edited ad content
+      const updatedStrategy = { ...originalStrategyJson } as Record<string, unknown>;
+      
+      if (updatedStrategy.creative && typeof updatedStrategy.creative === 'object') {
+        const creative = updatedStrategy.creative as Record<string, unknown>;
+        // Update headlines, primary_texts, descriptions from edited ads
+        creative.headlines = adsToSave.map(ad => ad.headline);
+        creative.primary_texts = adsToSave.map(ad => ad.primaryText);
+        creative.descriptions = adsToSave.map(ad => ad.description || "");
+        // CTA might have been edited in one of the ads, use the first one
+        if (adsToSave[0]?.buttonText) {
+          creative.cta = adsToSave[0].buttonText;
+        }
+      }
+
+      // Save to backend
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        console.error("No auth token available");
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/campaign/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          strategy_json: updatedStrategy,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to save campaign: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Campaign saved successfully:", data);
+
+      // Add success message
+      const successMsg: Message = {
+        id: `${Date.now()}-campaign-saved`,
+        role: "assistant",
+        content: `הקמפיין נשמר בהצלחה! מזהה הקמפיין: ${data.campaign_id}`,
+      };
+      addMessage(successMsg);
+    } catch (e) {
+      console.error("Failed to save campaign:", e);
+      const errorMsg: Message = {
+        id: `${Date.now()}-campaign-error`,
+        role: "assistant",
+        content: "מצטער, לא הצלחתי לשמור את הקמפיין. אנא נסה שוב.",
+      };
+      addMessage(errorMsg);
     }
   };
 
@@ -491,6 +573,16 @@ const MainApp = () => {
                     message={message}
                     onAdUploadComplete={handleAdUploadComplete}
                     conversationId={conversationId}
+                    onCampaignReady={message.showCampaignReadyButton ? handleCampaignReady : undefined}
+                    onStrategyAdUpdate={(adIndex, updatedAd) => {
+                      // Update the current strategy ads state when an ad is edited
+                      setCurrentStrategyAds((prev) => {
+                        if (!prev) return prev;
+                        const updated = [...prev];
+                        updated[adIndex] = updatedAd;
+                        return updated;
+                      });
+                    }}
                   />
                 ))
               )}
