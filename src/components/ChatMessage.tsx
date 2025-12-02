@@ -150,9 +150,11 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId }: Cha
             : "gradient-primary shadow-glow"
         )}
       >
-        <p className="text-sm md:text-base whitespace-pre-wrap leading-relaxed">
-          {message.content}
-        </p>
+        {message.content && (
+          <p className="text-sm md:text-base whitespace-pre-wrap leading-relaxed">
+            {message.content}
+          </p>
+        )}
         {/* Render multiple strategy ads */}
         {message.strategyAds && message.strategyAds.length > 0 && (
           <div className="mt-4 space-y-4">
@@ -190,6 +192,17 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId }: Cha
             className="mt-4 w-full gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
           >
             {isFacebookLoading ? "מתחבר..." : "Login with facebook"}
+          </Button>
+        )}
+        {message.showCampaignReadyButton && (
+          <Button
+            onClick={() => {
+              // Handle campaign ready - will be implemented
+              console.log("Campaign ready button clicked");
+            }}
+            className="mt-4 w-full min-w-[300px] py-6 px-8 text-lg font-semibold gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
+          >
+            הקמפיין מוכן
           </Button>
         )}
       </div>

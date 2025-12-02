@@ -389,6 +389,17 @@ const MainApp = () => {
       
       console.log("Adding strategy message to chat:", strategyMsg);
       addMessage(strategyMsg);
+      
+      // Add a follow-up message with "הקמפיין מוכן" button after the ads
+      if (strategyAds && strategyAds.length > 0) {
+        const readyMsg: Message = {
+          id: `${Date.now()}-campaign-ready`,
+          role: "assistant",
+          content: "",
+          showCampaignReadyButton: true,
+        };
+        addMessage(readyMsg);
+      }
     } catch (e) {
       console.error("Failed to send brief + media to strategy agent", e);
     } finally {
