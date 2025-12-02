@@ -205,7 +205,6 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
                       src={localData.media[currentMediaIndex].url} 
                       alt="Ad media" 
                       className="w-full h-full object-cover" 
-                      crossOrigin="anonymous"
                       onError={(e) => {
                         const img = e.target as HTMLImageElement;
                         console.error("❌ Failed to load image from URL:", localData.media[currentMediaIndex].url);

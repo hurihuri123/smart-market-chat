@@ -10,6 +10,7 @@ import { Send } from "lucide-react";
 import { FileUploadDialog } from "@/components/FileUploadDialog";
 import { fetchUserMessages } from "@/services/messageService";
 import { sendStrategyBriefAndMedia } from "@/services/chatService";
+import { API_BASE_URL } from "@/constants/api";
 
 type Tab = "chat" | "analytics";
 
@@ -151,7 +152,19 @@ const MainApp = () => {
     };
     addMessage(msg);
 
-    // Convert uploaded URLs to MediaItem format
+    // Convert uploaded URLs to MediaItem format and use proxy for S3 URLs
+    const getProxyUrl = (s3Url: string) => {
+      if (!s3Url) return s3Url;
+      // If it's already a proxy URL, return as is
+      if (s3Url.includes('/media/proxy')) return s3Url;
+      // If it's an S3 URL, convert to proxy URL
+      if (s3Url.includes('.s3.') || s3Url.includes('s3.amazonaws.com')) {
+        return `${API_BASE_URL}/media/proxy?url=${encodeURIComponent(s3Url)}`;
+      }
+      // Otherwise return as is (might be a data URL or other)
+      return s3Url;
+    };
+    
     const mediaItems: { url: string; type: "image" | "video" }[] = urls.map((url) => {
       const lowerUrl = url.toLowerCase();
       const isVideo =
@@ -161,7 +174,7 @@ const MainApp = () => {
         lowerUrl.endsWith(".mkv") ||
         lowerUrl.endsWith(".webm");
       return {
-        url,
+        url: getProxyUrl(url),
         type: isVideo ? "video" : "image",
       };
     });
@@ -231,9 +244,22 @@ const MainApp = () => {
           console.log("Selected images:", selectedImages);
           console.log("Selected videos:", selectedVideos);
           
+          // Convert S3 URLs to proxy URLs to avoid CORS issues
+          const getProxyUrlForStrategy = (s3Url: string) => {
+            if (!s3Url) return s3Url;
+            // If it's already a proxy URL, return as is
+            if (s3Url.includes('/media/proxy')) return s3Url;
+            // If it's an S3 URL, convert to proxy URL
+            if (s3Url.includes('.s3.') || s3Url.includes('s3.amazonaws.com')) {
+              return `${API_BASE_URL}/media/proxy?url=${encodeURIComponent(s3Url)}`;
+            }
+            // Otherwise return as is
+            return s3Url;
+          };
+          
           strategyMedia = [
-            ...selectedImages.map((url: string) => ({ url, type: "image" as const })),
-            ...selectedVideos.map((url: string) => ({ url, type: "video" as const })),
+            ...selectedImages.map((url: string) => ({ url: getProxyUrlForStrategy(url), type: "image" as const })),
+            ...selectedVideos.map((url: string) => ({ url: getProxyUrlForStrategy(url), type: "video" as const })),
           ];
           
           console.log("Parsed strategy media:", strategyMedia);
