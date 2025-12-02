@@ -207,6 +207,9 @@ const MainApp = () => {
         // Extract creative section from strategy JSON
         const creative = schema.creative || schema;
         
+        console.log("Full schema:", schema);
+        console.log("Creative section:", creative);
+        
         // Parse the creative section with arrays
         const headlines = Array.isArray(creative.headlines) ? creative.headlines : [];
         const primaryTexts = Array.isArray(creative.primary_texts) ? creative.primary_texts : [];
@@ -224,14 +227,24 @@ const MainApp = () => {
             ? creative.media_assets.selected_videos
             : [];
           
+          console.log("Strategy media_assets:", creative.media_assets);
+          console.log("Selected images:", selectedImages);
+          console.log("Selected videos:", selectedVideos);
+          
           strategyMedia = [
             ...selectedImages.map((url: string) => ({ url, type: "image" as const })),
             ...selectedVideos.map((url: string) => ({ url, type: "video" as const })),
           ];
+          
+          console.log("Parsed strategy media:", strategyMedia);
         }
+        
+        console.log("Uploaded media items:", mediaItems);
         
         // Use strategy media if available, otherwise fallback to uploaded media
         const availableMedia = strategyMedia.length > 0 ? strategyMedia : mediaItems;
+        
+        console.log("Available media for ads:", availableMedia);
         
         // Determine number of ads (up to 3) based on available content
         const maxAds = Math.min(
@@ -259,9 +272,14 @@ const MainApp = () => {
             const description = descriptions[i] || "";
             
             // Distribute media across ads
+            // If there's only one image/video, give it to all ads
+            // Otherwise, distribute across ads
             let adMedia: { url: string; type: "image" | "video" }[] = [];
             if (availableMedia.length > 0) {
-              if (maxAds === 1) {
+              if (availableMedia.length === 1) {
+                // Single media item: give it to all ads
+                adMedia = availableMedia;
+              } else if (maxAds === 1) {
                 // Single ad gets all media
                 adMedia = availableMedia;
               } else if (maxAds === 2) {
@@ -269,23 +287,35 @@ const MainApp = () => {
                 const midPoint = Math.ceil(availableMedia.length / 2);
                 adMedia = i === 0 ? availableMedia.slice(0, midPoint) : availableMedia.slice(midPoint);
               } else {
-                // Three ads: distribute evenly
+                // Three ads: distribute evenly, but ensure each ad gets at least one if possible
                 const perAd = Math.ceil(availableMedia.length / 3);
                 const start = i * perAd;
                 const end = Math.min(start + perAd, availableMedia.length);
                 adMedia = availableMedia.slice(start, end);
+                // If this ad got no media but there's media available, give it at least one
+                if (adMedia.length === 0 && availableMedia.length > 0) {
+                  adMedia = [availableMedia[i % availableMedia.length]];
+                }
               }
             }
             
+            console.log(`Ad ${i + 1} media:`, adMedia);
+            
             // Only add ad if it has at least a headline or primary text
             if (headline || primaryText || description) {
-              strategyAds.push({
+              const adData = {
                 headline: headline || "מודעה",
                 primaryText: primaryText || "",
                 description: description || undefined,
                 buttonText: cta || "למידע נוסף",
-                media: adMedia.length > 0 ? adMedia : undefined,
-              });
+                // Always include media array, even if empty (don't set to undefined)
+                media: adMedia.length > 0 ? adMedia : [],
+              };
+              
+              console.log(`Ad ${i + 1} data:`, adData);
+              console.log(`Ad ${i + 1} media array:`, adData.media);
+              console.log(`Ad ${i + 1} media length:`, adData.media.length);
+              strategyAds.push(adData);
             }
           }
           

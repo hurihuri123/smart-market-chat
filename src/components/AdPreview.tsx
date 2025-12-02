@@ -37,6 +37,15 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
   
   // Update localData when adData prop changes
   useEffect(() => {
+    console.log("AdPreview received adData:", adData);
+    console.log("AdPreview media:", adData.media);
+    console.log("AdPreview media type:", typeof adData.media);
+    console.log("AdPreview media is array:", Array.isArray(adData.media));
+    console.log("AdPreview media length:", adData.media?.length);
+    if (adData.media && adData.media.length > 0) {
+      console.log("AdPreview first media item:", adData.media[0]);
+      console.log("AdPreview first media URL:", adData.media[0]?.url);
+    }
     setLocalData(adData);
   }, [adData]);
   
@@ -186,16 +195,49 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
 
         {/* Media Section */}
         <div className="relative w-full aspect-[4/3] bg-secondary/20 overflow-hidden">
-          {localData.media && localData.media.length > 0 ? (
+          {localData.media && Array.isArray(localData.media) && localData.media.length > 0 ? (
             <>
               {/* Current Media Display */}
-              <div className="w-full h-full">
+              <div className="w-full h-full relative">
                 {localData.media[currentMediaIndex].type === "image" ? (
-                  <img 
-                    src={localData.media[currentMediaIndex].url} 
-                    alt="Ad media" 
-                    className="w-full h-full object-cover" 
-                  />
+                  <>
+                    <img 
+                      src={localData.media[currentMediaIndex].url} 
+                      alt="Ad media" 
+                      className="w-full h-full object-cover" 
+                      crossOrigin="anonymous"
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        console.error("❌ Failed to load image from URL:", localData.media[currentMediaIndex].url);
+                        console.error("Image element:", img);
+                        console.error("Image src attribute:", img.src);
+                        console.error("Image complete:", img.complete);
+                        console.error("Image naturalWidth:", img.naturalWidth);
+                        console.error("Image naturalHeight:", img.naturalHeight);
+                        // Hide broken image and show error message
+                        img.style.display = "none";
+                        const errorDiv = img.nextElementSibling as HTMLElement;
+                        if (errorDiv && errorDiv.classList.contains("image-error")) {
+                          errorDiv.style.display = "flex";
+                        }
+                      }}
+                      onLoad={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        console.log("✅ Image loaded successfully:", localData.media[currentMediaIndex].url);
+                        console.log("Image dimensions:", img.naturalWidth, "x", img.naturalHeight);
+                        // Hide error message if image loads
+                        const errorDiv = img.nextElementSibling as HTMLElement;
+                        if (errorDiv && errorDiv.classList.contains("image-error")) {
+                          errorDiv.style.display = "none";
+                        }
+                      }}
+                    />
+                    {/* Error fallback - shown when image fails to load */}
+                    <div className="image-error absolute inset-0 bg-secondary/40 flex flex-col items-center justify-center p-4 text-center" style={{ display: "none" }}>
+                      <p className="text-sm text-muted-foreground mb-2">לא ניתן לטעון את התמונה</p>
+                      <p className="text-xs text-muted-foreground break-all">{localData.media[currentMediaIndex].url}</p>
+                    </div>
+                  </>
                 ) : (
                   <div className="relative w-full h-full bg-black/90">
                     <video 
