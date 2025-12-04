@@ -25,6 +25,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   showFacebookLogin?: boolean;
+  showCampaignReadyButton?: boolean; // Show "הקמפיין מוכן" button
   adPreview?: AdData;
   isStrategyAd?: boolean;
   strategyAds?: AdData[]; // Multiple ads from strategy (up to 3)
@@ -80,10 +81,11 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
       }
 
       const handleMessage = (event: MessageEvent) => {
-        // Accept messages from our frontend origin and backend origin (FastAPI)
+        // Accept messages from our frontend origin and backend origins (local + Render)
         const allowedOrigins = [
           window.location.origin,
           "http://localhost:8000",
+          "https://campaigner-ai-backend.onrender.com",
         ];
         if (!allowedOrigins.includes(event.origin)) return;
 
