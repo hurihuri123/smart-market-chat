@@ -443,18 +443,45 @@ const MainApp = () => {
     }
 
     try {
-      // Update the strategy JSON with edited ad content
-      const updatedStrategy = { ...originalStrategyJson } as Record<string, unknown>;
-      
-      if (updatedStrategy.creative && typeof updatedStrategy.creative === 'object') {
-        const creative = updatedStrategy.creative as Record<string, unknown>;
-        // Update headlines, primary_texts, descriptions from edited ads
-        creative.headlines = adsToSave.map(ad => ad.headline);
-        creative.primary_texts = adsToSave.map(ad => ad.primaryText);
-        creative.descriptions = adsToSave.map(ad => ad.description || "");
-        // CTA might have been edited in one of the ads, use the first one
-        if (adsToSave[0]?.buttonText) {
-          creative.cta = adsToSave[0].buttonText;
+      // Update the strategy JSON with edited ad content, preserving all variants.
+      const updatedStrategy = { ...originalStrategyJson } as any;
+
+      if (updatedStrategy.creative && typeof updatedStrategy.creative === "object") {
+        const creative = updatedStrategy.creative as any;
+
+        // New format: creative.ads is an array of ad specs, each with up to 5 variants
+        if (Array.isArray(creative.ads) && creative.ads.length > 0) {
+          creative.ads = creative.ads.map((adSpec: any, idx: number) => {
+            const editedAd = adsToSave[idx];
+            if (!editedAd) return adSpec;
+
+            const clone = { ...(adSpec || {}) };
+
+            // Ensure arrays exist
+            clone.headlines = Array.isArray(clone.headlines) ? [...clone.headlines] : [];
+            clone.primary_texts = Array.isArray(clone.primary_texts) ? [...clone.primary_texts] : [];
+            clone.descriptions = Array.isArray(clone.descriptions) ? [...clone.descriptions] : [];
+
+            // Overwrite only the first variant with the edited content,
+            // keeping the remaining variants intact.
+            clone.headlines[0] = editedAd.headline;
+            clone.primary_texts[0] = editedAd.primaryText;
+            clone.descriptions[0] = editedAd.description || "";
+
+            if (editedAd.buttonText) {
+              clone.cta = editedAd.buttonText;
+            }
+
+            return clone;
+          });
+        } else {
+          // Backwards compatibility for older flat creative format
+          creative.headlines = adsToSave.map((ad) => ad.headline);
+          creative.primary_texts = adsToSave.map((ad) => ad.primaryText);
+          creative.descriptions = adsToSave.map((ad) => ad.description || "");
+          if (adsToSave[0]?.buttonText) {
+            creative.cta = adsToSave[0].buttonText;
+          }
         }
       }
 
