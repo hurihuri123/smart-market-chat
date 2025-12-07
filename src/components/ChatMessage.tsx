@@ -25,7 +25,6 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   showFacebookLogin?: boolean;
-  showCampaignReadyButton?: boolean; // Show "הקמפיין מוכן" button
   adPreview?: AdData;
   isStrategyAd?: boolean;
   strategyAds?: AdData[]; // Multiple ads from strategy (up to 3)
