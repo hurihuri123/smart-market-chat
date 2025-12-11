@@ -30,6 +30,7 @@ interface Message {
   adPreview?: AdData;
   isStrategyAd?: boolean;
   strategyAds?: AdData[]; // Multiple ads from strategy (up to 3)
+  showCampaignReadyButton?: boolean; // Show "הקמפיין מוכן" button
 }
 
 interface ChatMessageProps {
