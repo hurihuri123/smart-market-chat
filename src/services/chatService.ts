@@ -5,6 +5,10 @@ export interface ChatResponse {
   conversation_id: string;
   is_complete: boolean;
   strategy_schema?: unknown | null;
+  metadata?: {
+    platform?: string | null;
+    [key: string]: unknown;
+  } | null;
 }
 
 export async function sendChatMessage(message: string, conversationId?: string | null): Promise<ChatResponse> {
