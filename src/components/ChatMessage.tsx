@@ -201,21 +201,24 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
             />
           </div>
         )}
-        {message.showFacebookLogin && (
+        {/* Facebook login button (default) */}
+        {message.showFacebookLogin && message.loginPlatform !== "tiktok" && (
           <Button
-            onClick={
-              message.loginPlatform === "tiktok"
-                ? handleTikTokLogin
-                : handleFacebookLogin
-            }
+            onClick={handleFacebookLogin}
             disabled={isLoginLoading}
             className="mt-4 w-full gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
           >
-            {isLoginLoading
-              ? "מתחבר..."
-              : message.loginPlatform === "tiktok"
-              ? "Login with TikTok"
-              : "Login with facebook"}
+            {isLoginLoading ? "מתחבר..." : "Login with facebook"}
+          </Button>
+        )}
+        {/* TikTok login button (shown instead of Facebook when platform is TikTok) */}
+        {message.showFacebookLogin && message.loginPlatform === "tiktok" && (
+          <Button
+            onClick={handleTikTokLogin}
+            disabled={isLoginLoading}
+            className="mt-4 w-full gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
+          >
+            {isLoginLoading ? "מתחבר..." : "Login with TikTok"}
           </Button>
         )}
         {message.showCampaignReadyButton && (
