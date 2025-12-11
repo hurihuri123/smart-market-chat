@@ -55,10 +55,11 @@ export const FacebookLoginDialog = ({ open, onOpenChange, onSuccess }: FacebookL
 
       // Listen for messages from the popup (after OAuth redirect)
       const handleMessage = (event: MessageEvent) => {
-        // Verify origin for security: allow frontend + FastAPI backend origins
+        // Verify origin for security: allow frontend + FastAPI backend origins (local + Render)
         const allowedOrigins = [
           window.location.origin,
           "http://localhost:8000",
+          "https://campaigner-ai-backend.onrender.com",
         ];
         if (!allowedOrigins.includes(event.origin)) return;
         

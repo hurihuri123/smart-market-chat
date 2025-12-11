@@ -25,6 +25,8 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   showFacebookLogin?: boolean;
+  // Which platform the login button should use (derived from backend brief JSON)
+  loginPlatform?: "facebook" | "tiktok";
   adPreview?: AdData;
   isStrategyAd?: boolean;
   strategyAds?: AdData[]; // Multiple ads from strategy (up to 3)
@@ -41,10 +43,10 @@ interface ChatMessageProps {
 export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCampaignReady, onStrategyAdUpdate }: ChatMessageProps) => {
   const isAssistant = message.role === "assistant";
   const navigate = useNavigate();
-  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
 
   const handleFacebookLogin = async () => {
-    setIsFacebookLoading(true);
+    setIsLoginLoading(true);
     try {
       const query = conversationId ? `?conversation_id=${encodeURIComponent(conversationId)}` : "";
       const response = await fetch(`${API_BASE_URL}/auth/facebook/login${query}`, {
@@ -75,15 +77,16 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
 
       if (!popup) {
         toast.error("חלון הפופאפ נחסם. אנא אפשר פופאפים.");
-        setIsFacebookLoading(false);
+        setIsLoginLoading(false);
         return;
       }
 
       const handleMessage = (event: MessageEvent) => {
-        // Accept messages from our frontend origin and backend origin (FastAPI)
+        // Accept messages from our frontend origin and backend origins (local + Render)
         const allowedOrigins = [
           window.location.origin,
           "http://localhost:8000",
+          "https://campaigner-ai-backend.onrender.com",
         ];
         if (!allowedOrigins.includes(event.origin)) return;
 
@@ -110,7 +113,7 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
           window.removeEventListener("message", handleMessage);
         } else if (event.data.type === "facebook_auth_error") {
           toast.error("התחברות נכשלה. נסה שוב.");
-          setIsFacebookLoading(false);
+          setIsLoginLoading(false);
           window.removeEventListener("message", handleMessage);
         }
       };
@@ -121,14 +124,19 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
         if (popup.closed) {
           clearInterval(checkPopupClosed);
           window.removeEventListener("message", handleMessage);
-          setIsFacebookLoading(false);
+          setIsLoginLoading(false);
         }
       }, 500);
     } catch (error) {
       console.error("Facebook login error:", error);
       toast.error("התחברות נכשלה. נסה שוב.");
-      setIsFacebookLoading(false);
+      setIsLoginLoading(false);
     }
+  };
+
+  const handleTikTokLogin = async () => {
+    // Placeholder implementation until full TikTok OAuth flow is implemented.
+    toast.info("התחברות ל-TikTok תהיה זמינה בקרוב. בינתיים ניתן להתחבר עם Facebook ולהעלות קמפיינים לשם.");
   };
 
   return (
@@ -194,11 +202,19 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
         )}
         {message.showFacebookLogin && (
           <Button
-            onClick={handleFacebookLogin}
-            disabled={isFacebookLoading}
+            onClick={
+              message.loginPlatform === "tiktok"
+                ? handleTikTokLogin
+                : handleFacebookLogin
+            }
+            disabled={isLoginLoading}
             className="mt-4 w-full gradient-primary shadow-glow transition-smooth hover:shadow-[0_12px_30px_rgba(56,189,248,0.45)] hover:translate-y-[-1px]"
           >
-            {isFacebookLoading ? "מתחבר..." : "Login with facebook"}
+            {isLoginLoading
+              ? "מתחבר..."
+              : message.loginPlatform === "tiktok"
+              ? "Login with TikTok"
+              : "Login with facebook"}
           </Button>
         )}
         {message.showCampaignReadyButton && (

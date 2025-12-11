@@ -19,6 +19,8 @@ export interface Message {
   role: "user" | "assistant";
   content: string;
   showFacebookLogin?: boolean;
+  // Which platform the login button should use (derived from backend brief JSON)
+  loginPlatform?: "facebook" | "tiktok";
   adPreview?: AdData;
   isStrategyAd?: boolean;
   strategyAds?: AdData[]; // Multiple ads from strategy (up to 3)
@@ -74,11 +76,24 @@ export function useChat({ mode = "default" }: UseChatOptions = {}) {
         setConversationId(data.conversation_id);
       }
 
+      // Infer chosen platform from backend metadata (fallback to Facebook).
+      let loginPlatform: "facebook" | "tiktok" = "facebook";
+      const metaPlatform = data.metadata?.platform;
+      if (typeof metaPlatform === "string") {
+        const normalized = metaPlatform.trim().toLowerCase();
+        if (normalized === "tiktok") {
+          loginPlatform = "tiktok";
+        } else if (normalized === "facebook") {
+          loginPlatform = "facebook";
+        }
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: data.message ?? "…",
         showFacebookLogin: mode === "default" ? data.is_complete || false : false,
+        loginPlatform,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {

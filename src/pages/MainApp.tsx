@@ -430,30 +430,72 @@ const MainApp = () => {
       return;
     }
 
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      console.error("No auth token available");
+      const errorMsg: Message = {
+        id: `${Date.now()}-campaign-error`,
+        role: "assistant",
+        content: "נדרש להתחבר עם פייסבוק כדי לשמור ולהעלות את הקמפיין.",
+      };
+      addMessage(errorMsg);
+      return;
+    }
+
     try {
-      // Update the strategy JSON with edited ad content
-      const updatedStrategy = { ...originalStrategyJson } as Record<string, unknown>;
-      
-      if (updatedStrategy.creative && typeof updatedStrategy.creative === 'object') {
-        const creative = updatedStrategy.creative as Record<string, unknown>;
-        // Update headlines, primary_texts, descriptions from edited ads
-        creative.headlines = adsToSave.map(ad => ad.headline);
-        creative.primary_texts = adsToSave.map(ad => ad.primaryText);
-        creative.descriptions = adsToSave.map(ad => ad.description || "");
-        // CTA might have been edited in one of the ads, use the first one
-        if (adsToSave[0]?.buttonText) {
-          creative.cta = adsToSave[0].buttonText;
+      // Update the strategy JSON with edited ad content, preserving all variants.
+      const updatedStrategy = { ...originalStrategyJson } as any;
+
+      if (updatedStrategy.creative && typeof updatedStrategy.creative === "object") {
+        const creative = updatedStrategy.creative as any;
+
+        // New format: creative.ads is an array of ad specs, each with up to 5 variants
+        if (Array.isArray(creative.ads) && creative.ads.length > 0) {
+          creative.ads = creative.ads.map((adSpec: any, idx: number) => {
+            const editedAd = adsToSave[idx];
+            if (!editedAd) return adSpec;
+
+            const clone = { ...(adSpec || {}) };
+
+            // Ensure arrays exist
+            clone.headlines = Array.isArray(clone.headlines) ? [...clone.headlines] : [];
+            clone.primary_texts = Array.isArray(clone.primary_texts) ? [...clone.primary_texts] : [];
+            clone.descriptions = Array.isArray(clone.descriptions) ? [...clone.descriptions] : [];
+
+            // Overwrite only the first variant with the edited content,
+            // keeping the remaining variants intact.
+            clone.headlines[0] = editedAd.headline;
+            clone.primary_texts[0] = editedAd.primaryText;
+            clone.descriptions[0] = editedAd.description || "";
+
+            if (editedAd.buttonText) {
+              clone.cta = editedAd.buttonText;
+            }
+
+            return clone;
+          });
+        } else {
+          // Backwards compatibility for older flat creative format
+          creative.headlines = adsToSave.map((ad) => ad.headline);
+          creative.primary_texts = adsToSave.map((ad) => ad.primaryText);
+          creative.descriptions = adsToSave.map((ad) => ad.description || "");
+          if (adsToSave[0]?.buttonText) {
+            creative.cta = adsToSave[0].buttonText;
+          }
         }
       }
 
-      // Save to backend
-      const token = localStorage.getItem("auth_token");
-      if (!token) {
-        console.error("No auth token available");
-        return;
-      }
+      // Show loading message
+      const loadingMsgId = `campaign-saving-${Date.now()}`;
+      const loadingMsg: Message = {
+        id: loadingMsgId,
+        role: "assistant",
+        content: "שומר את הקמפיין ומעלה אותו ל-Facebook Ads Manager...",
+      };
+      addMessage(loadingMsg);
 
-      const response = await fetch(`${API_BASE_URL}/campaign/save`, {
+      // Step 1: Save to database
+      const saveResponse = await fetch(`${API_BASE_URL}/campaign/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -464,26 +506,52 @@ const MainApp = () => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to save campaign: ${response.status}`);
+      if (!saveResponse.ok) {
+        throw new Error(`Failed to save campaign: ${saveResponse.status}`);
       }
 
-      const data = await response.json();
-      console.log("Campaign saved successfully:", data);
+      const saveData = await saveResponse.json();
+      console.log("Campaign saved successfully:", saveData);
 
-      // Add success message
+      // Step 2: Upload to Meta Ads API
+      const uploadResponse = await fetch(`${API_BASE_URL}/campaign/upload-to-meta`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          campaign_id: saveData.campaign_id,
+        }),
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json().catch(() => ({ detail: "Unknown error" }));
+        throw new Error(errorData.detail || `Failed to upload campaign: ${uploadResponse.status}`);
+      }
+
+      const uploadData = await uploadResponse.json();
+      console.log("Campaign uploaded to Meta Ads API successfully:", uploadData);
+
+      // Remove loading message and add success message
+      setMessages((prev) => prev.filter((msg) => msg.id !== loadingMsgId));
+
       const successMsg: Message = {
-        id: `${Date.now()}-campaign-saved`,
+        id: `campaign-success-${Date.now()}`,
         role: "assistant",
-        content: `הקמפיין נשמר בהצלחה! מזהה הקמפיין: ${data.campaign_id}`,
+        content: `הקמפיין נשמר והועלה בהצלחה ל-Facebook Ads Manager! 🎉\n\nמזהה הקמפיין: ${saveData.campaign_id}\nמזהה הקמפיין ב-Meta: ${uploadData.meta_campaign_id}\n\nהקמפיין נמצא במצב טיוטה ומוכן לעריכה ב-Facebook Ads Manager.`,
       };
       addMessage(successMsg);
     } catch (e) {
-      console.error("Failed to save campaign:", e);
+      console.error("Failed to save/upload campaign:", e);
+      
+      // Remove loading message if it exists
+      setMessages((prev) => prev.filter((msg) => !msg.id.startsWith("campaign-saving-")));
+
       const errorMsg: Message = {
-        id: `${Date.now()}-campaign-error`,
+        id: `campaign-error-${Date.now()}`,
         role: "assistant",
-        content: "מצטער, לא הצלחתי לשמור את הקמפיין. אנא נסה שוב.",
+        content: `מצטער, לא הצלחתי לשמור או להעלות את הקמפיין. ${e instanceof Error ? e.message : "אנא נסה שוב."}`,
       };
       addMessage(errorMsg);
     }
