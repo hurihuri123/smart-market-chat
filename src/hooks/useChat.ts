@@ -76,7 +76,8 @@ export function useChat({ mode = "default" }: UseChatOptions = {}) {
         setConversationId(data.conversation_id);
       }
 
-      // Infer chosen platform from backend metadata (fallback to Facebook).
+      // Infer chosen platform from backend metadata (fallback to Facebook),
+      // and if metadata is missing or unclear, infer from the latest user message text.
       let loginPlatform: "facebook" | "tiktok" = "facebook";
       const metaPlatform = data.metadata?.platform;
       if (typeof metaPlatform === "string") {
@@ -84,6 +85,14 @@ export function useChat({ mode = "default" }: UseChatOptions = {}) {
         if (normalized === "tiktok") {
           loginPlatform = "tiktok";
         } else if (normalized === "facebook") {
+          loginPlatform = "facebook";
+        }
+      } else {
+        // Fallback: check the last user message content for platform hints.
+        const lowerContent = userMessage.content.toLowerCase();
+        if (lowerContent.includes("tiktok") || lowerContent.includes("טיקטוק")) {
+          loginPlatform = "tiktok";
+        } else if (lowerContent.includes("facebook") || lowerContent.includes("פייסבוק")) {
           loginPlatform = "facebook";
         }
       }
