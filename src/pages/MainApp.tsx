@@ -47,7 +47,7 @@ const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
   const [fileUploadOpen, setFileUploadOpen] = useState(false);
-  const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage, conversationId, setConversationId } =
+  const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage, conversationId, setConversationId, setMessages } =
     useChat({
       isOnboarding: false,
       mode: "strategy",

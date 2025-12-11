@@ -138,6 +138,7 @@ export function useChat({ mode = "default" }: UseChatOptions = {}) {
     setInput,
     setIsComplete,
     setConversationId,
+    setMessages,
     // actions
     handleSend,
     handleKeyDown,
