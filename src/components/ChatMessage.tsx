@@ -136,8 +136,82 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
   };
 
   const handleTikTokLogin = async () => {
-    // Placeholder implementation until full TikTok OAuth flow is implemented.
-    toast.info("התחברות ל-TikTok תהיה זמינה בקרוב. בינתיים ניתן להתחבר עם Facebook ולהעלות קמפיינים לשם.");
+    setIsLoginLoading(true);
+    try {
+      const query = conversationId ? `?conversation_id=${encodeURIComponent(conversationId)}` : "";
+      const response = await fetch(`${API_BASE_URL}/auth/tiktok/login${query}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get TikTok login URL");
+      }
+
+      const data = await response.json();
+
+      if (!data.url) {
+        throw new Error("No TikTok login URL received");
+      }
+
+      const width = 600;
+      const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+
+      const popup = window.open(
+        data.url,
+        "TikTok Login",
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes`
+      );
+
+      if (!popup) {
+        toast.error("חלון הפופאפ נחסם. אנא אפשר פופאפים.");
+        setIsLoginLoading(false);
+        return;
+      }
+
+      const handleMessage = (event: MessageEvent) => {
+        const allowedOrigins = [
+          window.location.origin,
+          "http://localhost:8000",
+          "https://campaigner-ai-backend.onrender.com",
+        ];
+        if (!allowedOrigins.includes(event.origin)) return;
+
+        if (event.data.type === "tiktok_auth_success") {
+          const user = event.data.user;
+          const token = event.data.access_token || user?.access_token;
+
+          if (token) {
+            localStorage.setItem("tiktok_auth_token", token);
+          }
+
+          console.log("TikTok success payload (chat):", event.data);
+          toast.success("התחברת לטיקטוק בהצלחה!");
+          window.removeEventListener("message", handleMessage);
+          setIsLoginLoading(false);
+        } else if (event.data.type === "tiktok_auth_error") {
+          toast.error("התחברות ל-TikTok נכשלה. נסה שוב.");
+          setIsLoginLoading(false);
+          window.removeEventListener("message", handleMessage);
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      const checkPopupClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopupClosed);
+          window.removeEventListener("message", handleMessage);
+          setIsLoginLoading(false);
+        }
+      }, 500);
+    } catch (error) {
+      console.error("TikTok login error:", error);
+      toast.error("התחברות ל-TikTok נכשלה. נסה שוב.");
+      setIsLoginLoading(false);
+    }
   };
 
   return (
