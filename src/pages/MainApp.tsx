@@ -577,7 +577,10 @@ const MainApp = () => {
       const errorMsg: Message = {
         id: `campaign-error-${Date.now()}`,
         role: "assistant",
-        content: `מצטער, לא הצלחתי לשמור או להעלות את הקמפיין. ${e instanceof Error ? e.message : "אנא נסה שוב."}`,
+        content:
+          "מצטער, לא הצלחתי לשמור או להעלות את הקמפיין. " +
+          "ודא שאתה מחובר לפלטפורמה המתאימה (Facebook או TikTok) ונסה שוב. " +
+          "אם הבעיה נמשכת, נסה לרענן את הדף ולנסות שוב.",
       };
       addMessage(errorMsg);
     }
