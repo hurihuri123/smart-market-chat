@@ -13,6 +13,26 @@ declare const window: any;
 declare function encodeURIComponent(uri: string): string;
 declare const Error: any;
 
+const AUTH_KEYS = [
+  "auth_token",
+  "refresh_token",
+  "token_expires_at",
+  "facebook_access_token",
+  "facebook_refresh_token",
+  "facebook_token_expires_at",
+  "tiktok_access_token",
+  "tiktok_token_expires_at",
+  "tiktok_auth_token",
+];
+
+const clearAuthStorage = () => {
+  try {
+    AUTH_KEYS.forEach((key) => localStorage.removeItem(key));
+  } catch {
+    // ignore storage errors
+  }
+};
+
 interface MediaItem {
   url: string;
   type: "image" | "video";
@@ -98,7 +118,9 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
         if (!allowedOrigins.includes(event.origin)) return;
 
         if (event.data.type === "facebook_auth_success") {
-          // Store only tokens in localStorage
+          // Replace any previous auth tokens in localStorage
+          clearAuthStorage();
+
           const user = event.data.user;
           const token = event.data.access_token || user?.access_token;
           const refreshToken = user?.refresh_token;
@@ -106,12 +128,15 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
 
           if (token) {
             localStorage.setItem("auth_token", token);
+            localStorage.setItem("facebook_access_token", token);
           }
           if (refreshToken) {
             localStorage.setItem("refresh_token", refreshToken);
+            localStorage.setItem("facebook_refresh_token", refreshToken);
           }
           if (expiresAt) {
             localStorage.setItem("token_expires_at", expiresAt);
+            localStorage.setItem("facebook_token_expires_at", expiresAt);
           }
 
           console.log("FB success payload (chat):", event.data);
@@ -186,13 +211,17 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
         if (!allowedOrigins.includes(event.origin)) return;
 
         if (event.data.type === "tiktok_auth_success") {
+          // Replace any previous auth tokens in localStorage
+          clearAuthStorage();
+
           const user = event.data.user;
           const token = event.data.access_token || user?.access_token;
 
           if (token) {
-            // Use the same key as Facebook so /app APIs keep working
+            // Use the same generic key so /app APIs keep working
             localStorage.setItem("auth_token", token);
             // Keep a TikTok-specific copy if we ever need to distinguish
+            localStorage.setItem("tiktok_access_token", token);
             localStorage.setItem("tiktok_auth_token", token);
           }
 
