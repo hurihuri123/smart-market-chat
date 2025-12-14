@@ -533,8 +533,8 @@ const MainApp = () => {
       const saveData = await saveResponse.json();
       console.log("Campaign saved successfully:", saveData);
 
-      // Step 2: Upload to Meta Ads API
-      const uploadResponse = await fetch(`${API_BASE_URL}/campaign/upload-to-meta`, {
+      // Step 2: Upload to the appropriate ads platform (Meta or TikTok)
+      const uploadResponse = await fetch(`${API_BASE_URL}/campaign/upload`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
