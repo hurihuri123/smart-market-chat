@@ -551,7 +551,13 @@ const MainApp = () => {
       }
 
       const uploadData = await uploadResponse.json();
-      console.log("Campaign uploaded to Meta Ads API successfully:", uploadData);
+      console.log("Campaign uploaded to ads platform successfully:", uploadData);
+
+      // Determine which platform was used based on the response shape
+      const isTikTok = Boolean((uploadData as any).tiktok_campaign_id);
+      const platformLabel = isTikTok ? "TikTok Ads" : "Facebook Ads Manager";
+      const platformCampaignId =
+        (uploadData as any).tiktok_campaign_id ?? (uploadData as any).meta_campaign_id ?? "";
 
       // Remove loading message and add success message
       setMessages((prev) => prev.filter((msg) => msg.id !== loadingMsgId));
@@ -559,7 +565,7 @@ const MainApp = () => {
       const successMsg: Message = {
         id: `campaign-success-${Date.now()}`,
         role: "assistant",
-        content: `הקמפיין נשמר והועלה בהצלחה ל-Facebook Ads Manager! 🎉\n\nמזהה הקמפיין: ${saveData.campaign_id}\nמזהה הקמפיין ב-Meta: ${uploadData.meta_campaign_id}\n\nהקמפיין נמצא במצב טיוטה ומוכן לעריכה ב-Facebook Ads Manager.`,
+        content: `הקמפיין נשמר והועלה בהצלחה ל-${platformLabel}! 🎉\n\nמזהה הקמפיין במערכת: ${platformCampaignId || "לא זמין"}`,
       };
       addMessage(successMsg);
     } catch (e) {
