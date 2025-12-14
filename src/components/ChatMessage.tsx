@@ -133,6 +133,12 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
 
           console.log("FB success payload (chat):", event.data);
           toast.success("התחברת בהצלחה!");
+          // Hint /app to auto-create an ad preview on first load after login
+          try {
+            localStorage.setItem("auto_create_ad_preview", "true");
+          } catch {
+            // ignore storage errors
+          }
           navigate("/app");
           window.removeEventListener("message", handleMessage);
         } else if (event.data.type === "facebook_auth_error") {
@@ -216,6 +222,12 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
 
           console.log("TikTok success payload (chat):", event.data);
           toast.success("התחברת לטיקטוק בהצלחה!");
+          // Hint /app to auto-create an ad preview on first load after login
+          try {
+            localStorage.setItem("auto_create_ad_preview", "true");
+          } catch {
+            // ignore storage errors
+          }
           navigate("/app");
           window.removeEventListener("message", handleMessage);
           setIsLoginLoading(false);

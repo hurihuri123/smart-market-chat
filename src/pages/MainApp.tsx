@@ -101,16 +101,29 @@ const MainApp = () => {
 
   // Auto-run the "צור מודעה" action once, after history (if any) is loaded
   useEffect(() => {
-    if (!hasLoadedHistory) return;
-    if (hasAutoCreatedAdPreview) return;
-    if (messages.length === 0) return;
+    if (!hasLoadedHistory || hasAutoCreatedAdPreview) return;
+
+    // If we just came from a login flow, we set a flag in localStorage so
+    // that /app knows to automatically start a new campaign.
+    let fromLogin = false;
+    try {
+      const flag = localStorage.getItem("auto_create_ad_preview");
+      fromLogin = flag === "true";
+    } catch {
+      // ignore storage errors
+    }
 
     const hasAdPreview = messages.some((msg) => msg.adPreview);
-    if (!hasAdPreview) {
-      // Same operation as clicking the "CREATE_AD_PREVIEW" quick action
-      const adMessage = {
+
+    // If user has existing history and no ad preview yet, keep the old behavior.
+    // Additionally, if we came here right after login (flag set), always create one.
+    const shouldCreate =
+      (!hasAdPreview && messages.length > 0) || fromLogin;
+
+    if (shouldCreate) {
+      const adMessage: Message = {
         id: Date.now().toString(),
-        role: "assistant" as const,
+        role: "assistant",
         content: "יאללה בוא נריץ קמפיין חדש, תעלה לי לכאן תמונות או סרטונים שתרצה שאריץ עבורך:",
         adPreview: {
           headline: "",
@@ -120,6 +133,13 @@ const MainApp = () => {
       };
       addMessage(adMessage);
       setHasAutoCreatedAdPreview(true);
+      if (fromLogin) {
+        try {
+          localStorage.removeItem("auto_create_ad_preview");
+        } catch {
+          // ignore
+        }
+      }
     }
   }, [messages, hasAutoCreatedAdPreview, addMessage, hasLoadedHistory]);
 

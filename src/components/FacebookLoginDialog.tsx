@@ -95,6 +95,11 @@ export const FacebookLoginDialog = ({ open, onOpenChange, onSuccess }: FacebookL
           
           console.log("FB success payload (dialog):", event.data);
           toast.success("התחברת בהצלחה!");
+          try {
+            localStorage.setItem("auto_create_ad_preview", "true");
+          } catch {
+            // ignore storage errors
+          }
           onSuccess?.();
           navigate("/app");
           window.removeEventListener("message", handleMessage);
