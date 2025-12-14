@@ -6,17 +6,8 @@ import { Loader2, Facebook } from "lucide-react";
 import { toast } from "sonner";
 import { API_BASE_URL } from "@/constants/api";
 
-const AUTH_KEYS = [
-  "auth_token",
-  "refresh_token",
-  "token_expires_at",
-  "facebook_access_token",
-  "facebook_refresh_token",
-  "facebook_token_expires_at",
-  "tiktok_access_token",
-  "tiktok_token_expires_at",
-  "tiktok_auth_token",
-];
+// Keep this in sync with ChatMessage.tsx
+const AUTH_KEYS = ["auth_token", "refresh_token", "token_expires_at"];
 
 const clearAuthStorage = () => {
   try {
@@ -94,15 +85,12 @@ export const FacebookLoginDialog = ({ open, onOpenChange, onSuccess }: FacebookL
 
           if (token) {
             localStorage.setItem("auth_token", token);
-            localStorage.setItem("facebook_access_token", token);
           }
           if (refreshToken) {
             localStorage.setItem("refresh_token", refreshToken);
-            localStorage.setItem("facebook_refresh_token", refreshToken);
           }
           if (expiresAt) {
             localStorage.setItem("token_expires_at", expiresAt);
-            localStorage.setItem("facebook_token_expires_at", expiresAt);
           }
           
           console.log("FB success payload (dialog):", event.data);

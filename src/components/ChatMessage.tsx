@@ -13,21 +13,16 @@ declare const window: any;
 declare function encodeURIComponent(uri: string): string;
 declare const Error: any;
 
-const AUTH_KEYS = [
-  "auth_token",
-  "refresh_token",
-  "token_expires_at",
-  "facebook_access_token",
-  "facebook_refresh_token",
-  "facebook_token_expires_at",
-  "tiktok_access_token",
-  "tiktok_token_expires_at",
-  "tiktok_auth_token",
-];
+// Auth-related keys we manage in localStorage.
+// For Facebook we store: auth_token, refresh_token, token_expires_at.
+// For TikTok we store: auth_token only.
+const AUTH_KEYS: string[] = ["auth_token", "refresh_token", "token_expires_at"];
 
 const clearAuthStorage = () => {
   try {
-    AUTH_KEYS.forEach((key) => localStorage.removeItem(key));
+    for (const key of AUTH_KEYS) {
+      localStorage.removeItem(key);
+    }
   } catch {
     // ignore storage errors
   }
@@ -128,15 +123,12 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
 
           if (token) {
             localStorage.setItem("auth_token", token);
-            localStorage.setItem("facebook_access_token", token);
           }
           if (refreshToken) {
             localStorage.setItem("refresh_token", refreshToken);
-            localStorage.setItem("facebook_refresh_token", refreshToken);
           }
           if (expiresAt) {
             localStorage.setItem("token_expires_at", expiresAt);
-            localStorage.setItem("facebook_token_expires_at", expiresAt);
           }
 
           console.log("FB success payload (chat):", event.data);
@@ -218,11 +210,8 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
           const token = event.data.access_token || user?.access_token;
 
           if (token) {
-            // Use the same generic key so /app APIs keep working
+            // TikTok only needs a single access token – store it in auth_token.
             localStorage.setItem("auth_token", token);
-            // Keep a TikTok-specific copy if we ever need to distinguish
-            localStorage.setItem("tiktok_access_token", token);
-            localStorage.setItem("tiktok_auth_token", token);
           }
 
           console.log("TikTok success payload (chat):", event.data);
