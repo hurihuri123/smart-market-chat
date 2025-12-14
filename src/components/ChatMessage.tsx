@@ -190,6 +190,9 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
           const token = event.data.access_token || user?.access_token;
 
           if (token) {
+            // Use the same key as Facebook so /app APIs keep working
+            localStorage.setItem("auth_token", token);
+            // Keep a TikTok-specific copy if we ever need to distinguish
             localStorage.setItem("tiktok_auth_token", token);
           }
 
