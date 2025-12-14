@@ -7,6 +7,12 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { API_BASE_URL } from "@/constants/api";
 
+// Ensure TypeScript / linting know about browser globals in this client component.
+// Typed as `any` to avoid issues when checking in non-DOM environments (Node).
+declare const window: any;
+declare function encodeURIComponent(uri: string): string;
+declare const Error: any;
+
 interface MediaItem {
   url: string;
   type: "image" | "video";
@@ -59,7 +65,7 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
         throw new Error("Failed to get Facebook login URL");
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { url?: string };
 
       if (!data.url) {
         throw new Error("No login URL received");
@@ -148,7 +154,7 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
         throw new Error("Failed to get TikTok login URL");
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { url?: string };
 
       if (!data.url) {
         throw new Error("No TikTok login URL received");
@@ -189,6 +195,7 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
 
           console.log("TikTok success payload (chat):", event.data);
           toast.success("התחברת לטיקטוק בהצלחה!");
+          navigate("/app");
           window.removeEventListener("message", handleMessage);
           setIsLoginLoading(false);
         } else if (event.data.type === "tiktok_auth_error") {
@@ -213,6 +220,9 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
       setIsLoginLoading(false);
     }
   };
+
+  const strategyAds = message.strategyAds as any;
+  const hasStrategyAds = !!strategyAds && (strategyAds as any)["length"] > 0;
 
   return (
     <div
@@ -241,9 +251,9 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
           </p>
         )}
         {/* Render multiple strategy ads */}
-        {message.strategyAds && message.strategyAds.length > 0 && (
+        {hasStrategyAds && (
           <div className="mt-4 space-y-4">
-            {message.strategyAds.map((ad, index) => (
+            {(strategyAds as any)["map"]((ad: AdData, index: number) => (
               <AdPreview
                 key={index}
                 adData={ad}
