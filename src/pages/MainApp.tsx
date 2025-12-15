@@ -533,7 +533,7 @@ const MainApp = () => {
       const saveData = await saveResponse.json();
       console.log("Campaign saved successfully:", saveData);
 
-      // Step 2: Upload to the appropriate ads platform (Meta or TikTok)
+      // Step 2: Upload to the relevant ads platform (Meta or TikTok)
       const uploadResponse = await fetch(`${API_BASE_URL}/campaign/upload`, {
         method: "POST",
         headers: {
@@ -551,13 +551,16 @@ const MainApp = () => {
       }
 
       const uploadData = await uploadResponse.json();
-      console.log("Campaign uploaded to ads platform successfully:", uploadData);
+      console.log("Campaign uploaded successfully:", uploadData);
 
-      // Determine which platform was used based on the response shape
-      const isTikTok = Boolean((uploadData as any).tiktok_campaign_id);
-      const platformLabel = isTikTok ? "TikTok Ads" : "Facebook Ads Manager";
-      const platformCampaignId =
-        (uploadData as any).tiktok_campaign_id ?? (uploadData as any).meta_campaign_id ?? "";
+      const platformLabel =
+        uploadData.platform === "tiktok" ? "TikTok Ads" : "Facebook Ads Manager";
+      const platformCampaignIdLabel =
+        uploadData.platform === "tiktok" ? "מזהה הקמפיין ב-TikTok" : "מזהה הקמפיין ב-Meta";
+      const platformCampaignIdValue =
+        uploadData.platform === "tiktok"
+          ? uploadData.tiktok_campaign_id
+          : uploadData.meta_campaign_id;
 
       // Remove loading message and add success message
       setMessages((prev) => prev.filter((msg) => msg.id !== loadingMsgId));
@@ -565,7 +568,7 @@ const MainApp = () => {
       const successMsg: Message = {
         id: `campaign-success-${Date.now()}`,
         role: "assistant",
-        content: `הקמפיין נשמר והועלה בהצלחה ל-${platformLabel}! 🎉\n\nמזהה הקמפיין במערכת: ${platformCampaignId || "לא זמין"}`,
+        content: `הקמפיין נשמר והועלה בהצלחה ל-${platformLabel}! 🎉\n\nמזהה הקמפיין במערכת: ${saveData.campaign_id}\n${platformCampaignIdLabel}: ${platformCampaignIdValue}\n\nהקמפיין נמצא במצב טיוטה ומוכן לעריכה בחשבון המודעות שלך.`,
       };
       addMessage(successMsg);
     } catch (e) {
@@ -577,10 +580,7 @@ const MainApp = () => {
       const errorMsg: Message = {
         id: `campaign-error-${Date.now()}`,
         role: "assistant",
-        content:
-          "מצטער, לא הצלחתי לשמור או להעלות את הקמפיין. " +
-          "ודא שאתה מחובר לפלטפורמה המתאימה (Facebook או TikTok) ונסה שוב. " +
-          "אם הבעיה נמשכת, נסה לרענן את הדף ולנסות שוב.",
+        content: `מצטער, לא הצלחתי לשמור או להעלות את הקמפיין. ${e instanceof Error ? e.message : "אנא נסה שוב."}`,
       };
       addMessage(errorMsg);
     }
