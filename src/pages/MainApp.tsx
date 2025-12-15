@@ -616,7 +616,7 @@ const MainApp = () => {
       const errorMsg: Message = {
         id: `campaign-error-${globalThis.Date.now()}`,
         role: "assistant",
-        content: `מצטער, לא הצלחתי לשמור או להעלות את הקמפיין. ${e instanceof Error ? e.message : "אנא נסה שוב."}`,
+        content: `מעלה את הקמפיין לטיקטוק... ${e instanceof Error ? e.message : "אנא נסה שוב."}`,
       };
       addMessage(errorMsg);
     }

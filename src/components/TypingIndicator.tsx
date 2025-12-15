@@ -6,7 +6,7 @@ interface TypingIndicatorProps {
 }
 
 export const TypingIndicator = ({
-  text = "בונה לך אסטרטגיה לקמפיין חדש...",
+  text = "חושב...",
 }: TypingIndicatorProps) => {
   return (
     <div

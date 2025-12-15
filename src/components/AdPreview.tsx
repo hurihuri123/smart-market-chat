@@ -411,7 +411,7 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
             size="lg"
           >
             <CheckCircle2 className="w-5 h-5 ml-2" />
-            {isSubmitting ? "מעלה..." : "המודעה מוכנה"}
+            {isSubmitting ? "מעלה..." : "תעלה את התמונות\\סרטונים"}
           </Button>
         </div>
       )}
