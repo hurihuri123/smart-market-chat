@@ -198,7 +198,7 @@ const MainApp = () => {
   const handleAdUploadComplete = async (urls: string[]) => {
     if (!urls.length) return;
     const content = `הקבצים הועלו בהצלחה. כתובות המדיה הן:\n${urls.join("\n")}`;
-      const msg: Message = {
+    const msg: Message = {
         id: `${globalThis.Date.now()}-upload-urls`,
       role: "assistant",
       content,
