@@ -541,7 +541,7 @@ const MainApp = () => {
       const loadingMsg: Message = {
         id: loadingMsgId,
         role: "assistant",
-        content: "שומר את הקמפיין ומעלה אותו ל-Facebook Ads Manager...",
+        content: "מעלה את הקמפיין ל TikTok Ads...",
       };
       addMessage(loadingMsg);
 
