@@ -9,6 +9,7 @@ import { TypingIndicator } from "@/components/TypingIndicator";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 import { FileUploadDialog } from "@/components/FileUploadDialog";
+import { ContactDetailsDialog } from "@/components/ContactDetailsDialog";
 import { fetchUserMessages } from "@/services/messageService";
 import { sendStrategyBriefAndMedia } from "@/services/chatService";
 import { API_BASE_URL } from "@/constants/api";
@@ -76,6 +77,8 @@ const QuickActionButtons = ({ onAction }: { onAction: (action: string) => void }
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
   const [fileUploadOpen, setFileUploadOpen] = useState(false);
+  const [contactDetailsOpen, setContactDetailsOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | number | null>(null);
   const { messages, input, setInput, isLoading, handleSend, handleKeyDown, addMessage, conversationId, setConversationId, setMessages } =
     useChat({
       isOnboarding: false,
@@ -129,6 +132,37 @@ const MainApp = () => {
 
     loadHistory();
   }, [addMessage, hasLoadedHistory]);
+
+  // Check if user just logged in with TikTok and show contact details modal
+  useEffect(() => {
+    if (!hasLoadedHistory) return;
+
+    try {
+      const flag = localStorage.getItem("tiktok_just_logged_in");
+      if (flag === "true") {
+        setContactDetailsOpen(true);
+        // Extract user ID from localStorage if available
+        const token = localStorage.getItem("auth_token");
+        if (token) {
+          // Try to get user info from the window message event or localStorage
+          const userInfo = localStorage.getItem("current_user_info");
+          if (userInfo) {
+            try {
+              const parsed = JSON.parse(userInfo);
+              setCurrentUserId(parsed.user_id || parsed.id);
+            } catch {
+              // If parsing fails, we'll pass null and the backend will resolve from token
+              setCurrentUserId(null);
+            }
+          }
+        }
+        // Clean up the flag
+        localStorage.removeItem("tiktok_just_logged_in");
+      }
+    } catch (e) {
+      console.error("Error checking login status:", e);
+    }
+  }, [hasLoadedHistory]);
 
   // Auto-run the "צור מודעה" action once, after history (if any) is loaded
   useEffect(() => {
@@ -771,6 +805,14 @@ const MainApp = () => {
         open={fileUploadOpen}
         onOpenChange={setFileUploadOpen}
         onFilesSelected={handleFilesSelected}
+      />
+
+      {/* Contact Details Dialog - shown after TikTok login */}
+      <ContactDetailsDialog
+        open={contactDetailsOpen}
+        onClose={() => setContactDetailsOpen(false)}
+        userId={currentUserId || undefined}
+        onSuccess={() => setContactDetailsOpen(false)}
       />
     </div>
   );

@@ -220,6 +220,12 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
             localStorage.setItem("auth_token", token);
           }
 
+          // Store user info and set flag to show contact details modal
+          if (user) {
+            localStorage.setItem("current_user_info", JSON.stringify(user));
+          }
+          localStorage.setItem("tiktok_just_logged_in", "true");
+
           console.log("TikTok success payload (chat):", event.data);
           toast.success("התחברת לטיקטוק בהצלחה!");
           // Hint /app to auto-create an ad preview on first load after login
