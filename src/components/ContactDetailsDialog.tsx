@@ -115,7 +115,7 @@ export const ContactDetailsDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()}>
-      <AlertDialogContent className="max-w-sm">
+      <AlertDialogContent className="max-w-md">
         <div className="flex flex-col items-center justify-center mb-6">
           <h2 className="text-2xl font-bold text-center">פרטים ליצירת קשר</h2>
           <p className="text-sm text-gray-500 text-center mt-2">
@@ -123,9 +123,9 @@ export const ContactDetailsDialog = ({
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="fullName" className="text-right block">
+        <form onSubmit={handleSubmit} className="space-y-6" dir="rtl">
+          <div className="space-y-3">
+            <Label htmlFor="fullName" className="text-left block">
               שם מלא
             </Label>
             <Input
@@ -140,8 +140,8 @@ export const ContactDetailsDialog = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber" className="text-right block">
+          <div className="space-y-3">
+            <Label htmlFor="phoneNumber" className="text-left block">
               מספר טלפון
             </Label>
             <Input
@@ -151,13 +151,13 @@ export const ContactDetailsDialog = ({
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               disabled={isLoading}
-              dir="ltr"
+              dir="rtl"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-right block">
+          <div className="space-y-3">
+            <Label htmlFor="email" className="text-left block">
               כתובת אימייל
             </Label>
             <Input
@@ -167,7 +167,7 @@ export const ContactDetailsDialog = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
-              dir="ltr"
+              dir="rtl"
               required
             />
           </div>
