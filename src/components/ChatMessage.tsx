@@ -241,8 +241,8 @@ export const ChatMessage = ({ message, onAdUploadComplete, conversationId, onCam
           toast.error("התחברות ל-TikTok נכשלה. נסה שוב.");
           setIsLoginLoading(false);
           window.removeEventListener("message", handleMessage);
-    }
-  };
+        }
+      };
 
       window.addEventListener("message", handleMessage);
 
