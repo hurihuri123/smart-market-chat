@@ -67,8 +67,7 @@ export const ContactDetailsDialog = ({
         headers["Authorization"] = `Bearer ${authToken}`;
       }
       
-      // Send request without waiting for response - close modal immediately
-      fetch(`${API_BASE_URL}/api/users/contact-details`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/contact-details`, {
         method: "POST",
         headers,
         credentials: "include",
@@ -78,29 +77,30 @@ export const ContactDetailsDialog = ({
           email: email,
           user_id: userId,
         }),
-      }).then(response => {
-        if (response.ok) {
-          console.log("Contact details saved successfully");
-        } else {
-          console.error("Backend returned error:", response.status);
-        }
-      }).catch(err => {
-        console.error("Request sent (background):", err);
       });
 
-      // Clear form immediately
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API error response:", errorData);
+        throw new Error(errorData.detail || "שגיאה בשמירת הפרטים");
+      }
+
+      const result = await response.json();
+      console.log("Success:", result);
+
+      // Clear form
       setFullName("");
       setPhoneNumber("");
       setEmail("");
       
-      // Close dialog immediately
-      if (onClose) {
-        onClose();
-      }
-      
       // Call success callback
       if (onSuccess) {
         onSuccess();
+      }
+
+      // Close dialog (only if user doesn't prevent it via onClose logic)
+      if (onClose) {
+        onClose();
       }
     } catch (err) {
       console.error("Contact details error:", err);
