@@ -67,7 +67,8 @@ export const ContactDetailsDialog = ({
         headers["Authorization"] = `Bearer ${authToken}`;
       }
       
-      const response = await fetch(`${API_BASE_URL}/api/users/contact-details`, {
+      // Fire-and-forget: send contact details in background and close modal immediately
+      fetch(`${API_BASE_URL}/api/users/contact-details`, {
         method: "POST",
         headers,
         credentials: "include",
@@ -77,31 +78,31 @@ export const ContactDetailsDialog = ({
           email: email,
           user_id: userId,
         }),
-      });
+      })
+        .then(async (res) => {
+          try {
+            if (!res.ok) {
+              const errorData = await res.json().catch(() => ({}));
+              console.error("Background API error:", errorData);
+            } else {
+              const result = await res.json().catch(() => ({}));
+              console.log("Contact details saved (background):", result);
+            }
+          } catch (e) {
+            console.error("Error handling background response:", e);
+          }
+        })
+        .catch((err) => {
+          // Network/CORS errors will be logged but won't block the UI
+          console.error("Background request failed:", err);
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("API error response:", errorData);
-        throw new Error(errorData.detail || "שגיאה בשמירת הפרטים");
-      }
-
-      const result = await response.json();
-      console.log("Success:", result);
-
-      // Clear form
+      // Clear form and close dialog immediately so the user isn't blocked by network issues
       setFullName("");
       setPhoneNumber("");
       setEmail("");
-      
-      // Call success callback
-      if (onSuccess) {
-        onSuccess();
-      }
-
-      // Close dialog (only if user doesn't prevent it via onClose logic)
-      if (onClose) {
-        onClose();
-      }
+      if (onSuccess) onSuccess();
+      if (onClose) onClose();
     } catch (err) {
       console.error("Contact details error:", err);
       setError(
