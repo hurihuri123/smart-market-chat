@@ -116,9 +116,9 @@ export const ContactDetailsDialog = ({
   return (
     <AlertDialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()}>
       <AlertDialogContent className="max-w-sm">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-right">פרטים ליצירת קשר</h2>
-          <p className="text-sm text-gray-500 text-right mt-2">
+        <div className="flex flex-col items-center justify-center mb-6">
+          <h2 className="text-2xl font-bold text-center">פרטים ליצירת קשר</h2>
+          <p className="text-sm text-gray-500 text-center mt-2">
             אנא מלא את הפרטים שלך כדי להמשיך
           </p>
         </div>
