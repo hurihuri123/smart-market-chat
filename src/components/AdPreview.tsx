@@ -297,18 +297,7 @@ export const AdPreview = ({ adData, onUpdate, editable = false, showSubmitButton
                 </button>
               )}
 
-              {/* Add More Button */}
-              {editable && localData.media.length < 10 && (
-                <button
-                  onClick={() => setShowUploadDialog(true)}
-                  className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-primary/90 backdrop-blur-sm flex items-center gap-2 hover:bg-primary transition-smooth shadow-glow"
-                >
-                  <Upload className="w-4 h-4 text-white" />
-                  <span className="text-sm text-white font-medium">
-                    הוסף עוד ({localData.media.length}/10)
-                  </span>
-                </button>
-              )}
+              
             </>
           ) : editable ? (
             <button
