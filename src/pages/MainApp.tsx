@@ -189,7 +189,7 @@ const MainApp = () => {
       const adMessage: Message = {
         id: globalThis.Date.now().toString(),
         role: "assistant",
-        content: "יאללה בוא נריץ קמפיין חדש, תעלה לי לכאן תמונות או סרטונים שתרצה שאריץ עבורך:",
+        content: "יאללה בוא נריץ קמפיין חדש, תעלה לי לכאן סרטונים שתרצה שאריץ עבורך:",
         adPreview: {
           headline: "",
           primaryText: "",
@@ -216,7 +216,7 @@ const MainApp = () => {
       const adMessage = {
         id: globalThis.Date.now().toString(),
         role: "assistant" as const,
-        content: "יאללה בוא נריץ קמפיין חדש, תעלה לי לכאן תמונות או סרטונים שתרצה שאריץ עבורך:",
+        content: "יאללה בוא נריץ קמפיין חדש, תעלה לי לכאן סרטונים שתרצה שאריץ עבורך:",
         adPreview: {
           headline: "",
           primaryText: "",
